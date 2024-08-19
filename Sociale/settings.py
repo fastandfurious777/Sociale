@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['192.168.1.58','127.0.0.1']
 # Application definition
 
 INSTALLED_APPS = [
+    'bike_map.apps.BikeMapConfig',
     'base.apps.BaseConfig',
     'django.contrib.admin',
     'django.contrib.auth',
