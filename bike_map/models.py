@@ -4,9 +4,9 @@ from django.utils import timezone
 
 class Bike(models.Model):
     name = models.CharField(max_length=100)
-    lon = models.FloatField()
     lat = models.FloatField()
-    encrypted_code = models.TextField()
+    lon = models.FloatField()
+    code = models.IntegerField()
     is_available = models.BooleanField()
     last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT)
     last_updated = models.DateTimeField(auto_now=True)
@@ -15,8 +15,8 @@ class Bike(models.Model):
         return self.name
 
 class Rental(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    bike = models.ForeignKey(Bike, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT)
+    bike = models.OneToOneField(Bike, on_delete=models.PROTECT)
     start_time = models.DateTimeField(auto_now=True)
     end_time = models.DateTimeField(null=True,blank=True)
     is_completed = models.BooleanField(null=True)
