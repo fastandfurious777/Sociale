@@ -11,13 +11,8 @@
     <script>
 
 async function onScanSuccess(decodedText, decodedResult) {
-    const link = "{% url 'get-bike-code' %}";
-    const url = new URL(link, window.location.origin); 
-    url.search = new URLSearchParams({ "qr_code": decodedText });
-    const response = await fetch(url);
-    const data = await response.json();
-    window.location.href = "{% url 'map-home' %}"
-    alert(`Yours code is: ${data.bike_code}`); 
+    sessionStorage.setItem('bike_id', decodedText);
+    window.location.href = "{% url 'map-home' %}";
 }
 function onScanError(errorMessage) {
   // handle on error condition, with error message
