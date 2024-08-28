@@ -4,8 +4,8 @@ from .models import Bike, Rental
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from cryptography.fernet import Fernet
-from django.conf import settings
+# from cryptography.fernet import Fernet
+# from django.conf import settings
 
 @login_required
 def home(request):
@@ -52,7 +52,7 @@ def get_bike_code(request):
             user = request.user
             bike_id = int(request.GET.get("bike_id"))
             bike = Bike.objects.get(id=bike_id)
-            fernet = Fernet(settings.CIPHER_KEY)
+            # fernet = Fernet(settings.CIPHER_KEY)
             bike_code = bike.code 
             '''fernet.decrypt(bike.code).decode()'''
         except ValueError:
