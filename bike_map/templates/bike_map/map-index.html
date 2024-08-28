@@ -41,44 +41,15 @@
         </div>
     </div>
     <script src="{% static 'base/script.js' %}"></script>
-    <script> 
-      initMap();
+    <script>
+        // const links = {
+        //     'get-user-status':"{% url 'get-user-status' %}",
+        //     'scanner':"{% url 'scanner' %}",
+        //     'get-bike-code': "{% url 'get-bike-code' %}",
 
-    let currentStep = 'scan';
-    const menuButton = document.getElementById('menuButton');
-    const menuHeader = document.getElementById('menuHeader');
-    const userName = menuHeader.getAttribute('context-username');
 
-    async function updateUI(){
-    if (currentStep === 'scan') {
-        menuButton.textContent = 'Scan';
-        menuHeader.textContent = `Hello, ${userName}`;
-        menuButton.onclick = () => window.location.href = '{% url "scanner" %}';
-
-    } else if (currentStep === 'start') {
-        menuButton.textContent = 'Start Ride';
-        const bike_code = await GetBikeCode(sessionStorage.getItem('bike_id'),"{% url 'get-bike-code' %}");
-        menuHeader.textContent = `Your code is: ${bike_code}`;
-        menuButton.onclick = () => {
-            currentStep = 'end';
-            updateUI();
-        };
-    } else if (currentStep === 'end') {
-        menuButton.textContent = 'End Ride';
-        menuHeader.textContent = 'Enjoy your trip!';
-        menuButton.onclick = () => {
-            currentStep = 'scan';
-            sessionStorage.removeItem('bike_id');
-            updateUI();
-        };
-    }
-};
-
-if (sessionStorage.getItem('bike_id')) {
-    currentStep = 'start';
-}
-
-updateUI();
+        // }
+    runApp();
     </script>
 </body>
 
