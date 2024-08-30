@@ -10,7 +10,6 @@ class Bike(models.Model):
     is_available = models.BooleanField()
     last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT)
     last_updated = models.DateTimeField(auto_now=True)
-
     def __str__(self):
         return self.name
 

@@ -1,17 +1,25 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth.models import User
 from django.contrib.auth import login, logout 
-
-from . forms import CreateUserForm,LoginUserForm
+from . forms import CreateUserForm, LoginUserForm, ContactForm
+from django.contrib.auth.models import User
+from bike_map.models import Bike, Rental
 
 def home(request):
-    #Dummy data
-    context = {
-        'available_bikes': 20,
-        'active_users': User.objects.filter(is_active=True).count(),
-        'dollars_saved': 5000
-    }
-    return render(request, 'base/index.html', context)
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            #TODO
+            return #success
+        return #failure
+    else:
+        context = {
+            'form': ContactForm(),
+            'available_bikes': Bike.objects.count(),
+            'active_users': User.objects.filter(is_active=True).count(),
+            #Assuming one rental equals one bus fare 
+            'dollars_saved': Rental.objects.count()
+        }
+        return render(request, 'base/index.html', context)
 
 def register(request):
     if request.method == 'POST':

@@ -1,19 +1,6 @@
+{% extends 'base/core.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html data-bs-theme="light" lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-    <title>Sociale</title>
-    <link rel="stylesheet" href="{% static 'base/assets/bootstrap/css/bootstrap.min.css' %}">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alatsi&amp;display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Aleo&amp;display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:400,800&amp;display=swap">
-    <link rel="stylesheet" href="{% static 'base/assets/css/Navbar-With-Button-icons.css' %}">
-    <link rel="stylesheet" href="{% static 'base/assets/css/styles.css' %}">
-</head>
-
+{% block content %}
 <body>
     <div class="row" style="height: 75vh;">
         <div class="col">
@@ -42,15 +29,7 @@
     </div>
     <script src="{% static 'base/script.js' %}"></script>
     <script>
-        // const links = {
-        //     'get-user-status':"{% url 'get-user-status' %}",
-        //     'scanner':"{% url 'scanner' %}",
-        //     'get-bike-code': "{% url 'get-bike-code' %}",
-
-
-        // }
     runApp();
     </script>
 </body>
-
-</html>
+{% endblock %}
