@@ -1,5 +1,6 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth import login, logout 
+from django.contrib.auth import login, logout
+from django.contrib import messages
 from . forms import CreateUserForm, LoginUserForm, ContactForm
 from django.contrib.auth.models import User
 from bike_map.models import Bike, Rental
@@ -9,8 +10,10 @@ def home(request):
         form = ContactForm(request.POST)
         if form.is_valid():
             #TODO
-            return #success
-        return #failure
+            messages.success(request, 'All good... We will get back to you shortly!')
+            return redirect('home')
+        else:
+            messages.success(request, 'Something went wrong :( , consider contacting us on IG ')
     else:
         context = {
             'form': ContactForm(),

@@ -24,7 +24,7 @@
                     <div>
                         <h2 class="text-uppercase fw-bold mb-3" style="font-size: 20vw;font-weight: bold;color: var(--bs-body-bg);">Sociale</h2>
                         <p style="font-size: medium;color: var(--bs-black);font-weight: bold;">We don't dream 😴💭</p>
-                        <p class="mb-4" style="font-size: medium;font-weight: bold;color: var(--bs-body-bg);">⬇We make it happen ...⬇</p><button class="btn btn-outline-primary fs-5 py-2 px-5" id="hero-btn" type="button">Contact Us</button>
+                        <p class="mb-4" style="font-size: medium;font-weight: bold;color: var(--bs-body-bg);">⬇We make it happen ...⬇</p><button class="btn btn-outline-primary fs-5 py-2 px-5" id="hero-btn" type="button" onclick="location.href='#contact'">Contact Us</button>
                     </div>
                 </div>
             </div>
@@ -116,6 +116,17 @@
                         <form class="p-3 p-xl-4" method="post">
                             {% csrf_token %}
                             <div class="mb-3">
+                                {% if messages %}
+                                    <div class="messages">
+                                        {% for message in messages %}
+                                            <div class="alert {{ message.tags }}"  style="font-weight: bold; color: #FC6701; ">
+                                                {{ message }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
                                 {{ form.name }}
                             </div>
                             <div class="mb-3">
@@ -132,12 +143,7 @@
                                     {% endfor %}
                                 </div>
                                 {% endif %}
-                            <!--
-                            <div class="mb-3"><input class="form-control" type="text" id="name-1" name="name" placeholder="Name"></div>
-                            <div class="mb-3"><input class="form-control" type="email" id="email-1" name="email" placeholder="Email"></div>
-                            <div class="mb-3"><textarea class="form-control" id="message-1" name="message" rows="6" placeholder="Message"></textarea></div>
-                                -->
-                            <div><button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701;">Send </button></div>
+                            <div><button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color:#fc6701 ;">Send </button></div>
                         </form>
                     </div>
                 </div>
