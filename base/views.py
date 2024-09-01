@@ -1,17 +1,35 @@
 from django.shortcuts import render,redirect
+from django.contrib.auth import login, logout
+from django.contrib import messages
+from . forms import CreateUserForm, LoginUserForm, ContactForm
 from django.contrib.auth.models import User
-from django.contrib.auth import login, logout 
+from bike_map.models import Bike, Rental
+from . import mails
 
-from . forms import CreateUserForm,LoginUserForm
 
 def home(request):
-    #Dummy data
-    context = {
-        'available_bikes': 20,
-        'active_users': User.objects.filter(is_active=True).count(),
-        'dollars_saved': 5000
-    }
-    return render(request, 'base/index.html', context)
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = request.POST['name']
+            email = request.POST['email']
+            message = request.POST['message']
+            try:
+                mails.contact_confirmation(email)
+                mails.contact_inbox(name,email,message)
+                messages.success(request, 'All good... We will get back to you shortly!')
+            except Exception:
+                messages.success(request, 'Something went wrong :( , consider contacting us on IG ')
+            return redirect('home')                       
+    else:
+        context = {
+            'form': ContactForm(),
+            'available_bikes': Bike.objects.count(),
+            'active_users': User.objects.filter(is_active=True).count(),
+            #Assuming one rental equals one bus fare (1$)
+            'dollars_saved': Rental.objects.count()
+        }
+        return render(request, 'base/index.html', context)
 
 def register(request):
     if request.method == 'POST':

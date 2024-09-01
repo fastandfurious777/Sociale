@@ -22,9 +22,9 @@
             <div class="row h-100">
                 <div class="col-md-10 col-xl-8 text-center d-flex d-sm-flex d-md-flex justify-content-center align-items-center mx-auto justify-content-md-start align-items-md-center justify-content-xl-center">
                     <div>
-                        <h2 class="text-uppercase fw-bold mb-3" style="font-size: 20vw;font-weight: bold;color: var(--bs-body-bg);">soCIALE</h2>
-                        <p style="font-size: medium;color: var(--bs-green);font-weight: bold;">Weed on't dream🥦</p>
-                        <p class="mb-4" style="font-size: medium;font-weight: bold;color: var(--bs-body-bg);">⬇We make it happen ...⬇</p><button class="btn btn-outline-primary fs-5 py-2 px-5" id="hero-btn" type="button">Contact Us</button>
+                        <h2 class="text-uppercase fw-bold mb-3" style="font-size: 20vw;font-weight: bold;color: var(--bs-body-bg);">Sociale</h2>
+                        <p style="font-size: medium;color: var(--bs-black);font-weight: bold;">We don't dream 😴💭</p>
+                        <p class="mb-4" style="font-size: medium;font-weight: bold;color: var(--bs-body-bg);">⬇We make it happen ...⬇</p><button class="btn btn-outline-primary fs-5 py-2 px-5" id="hero-btn" type="button" onclick="location.href='#contact'">Contact Us</button>
                     </div>
                 </div>
             </div>
@@ -37,7 +37,10 @@
             <div class="row">
                 <div class="col">
                     <h1 id="about-h1" class="py-2">Who are we?</h1>
-                    <p style="font-size: small;color: var(--bs-emphasis-color);text-align: center;border-color: var(--bs-emphasis-color);font-family: Inter, sans-serif;">Made by GTP, change it later. Welcome to Sociale, your go-to for affordable and eco-friendly bike rentals in Krakow. We believe that exploring the city should be easy, enjoyable, and accessible to everyone. Bessup.</p>
+                    <p style="font-size: small;color: var(--bs-emphasis-color);text-align: center;border-color: var(--bs-emphasis-color);font-family: Inter, sans-serif;">
+                    Welcome to Sociale, your go-to for affordable and eco-friendly bike rentals in Krakow. We believe that exploring the city should be easy, enjoyable, and accessible to everyone.
+                    If you're willing to give away your old bike ➡️ hit us up on Instagram or check out the contact form below BlessUP.
+                    </p>
                 </div>
             </div>
         </div>
@@ -46,19 +49,19 @@
                 <div class="row row-cols-md-3 row-cols-1">
                     <div class="col">
                         <div class="p-3">
-                            <h4 class="display-5 fw-bold text-white mb-0">30</h4>
+                            <h4 class="display-5 fw-bold text-white mb-0">{{ available_bikes }}</h4>
                             <p class="mb-0" style="color: rgb(255,255,255);">Available Bikes</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="p-3">
-                            <h4 class="display-5 fw-bold text-white mb-0">15</h4>
+                            <h4 class="display-5 fw-bold text-white mb-0">{{ active_users }}</h4>
                             <p class="mb-0" style="color: rgb(255,255,255);">Active Users</p>
                         </div>
                     </div>
                     <div class="col">
                         <div class="p-3">
-                            <h4 class="display-5 fw-bold text-white mb-0">5000</h4>
+                            <h4 class="display-5 fw-bold text-white mb-0">{{ dollars_saved }}</h4>
                             <p class="mb-0" style="color: rgb(255,255,255);">Dollars saved on bus fares</p>
                         </div>
                     </div>
@@ -73,7 +76,7 @@
             <div class="row">
                 <div class="col-md-8 col-xl-6 text-center mx-auto">
                     <h2 style="font-size: 5vw;color: #fc6701;">Contact us</h2>
-                    <p class="w-lg-50">In order to test our app 4️⃣&nbsp;3️⃣</p>
+                    <p class="w-lg-50">In order to become a beta tester</p>
                 </div>
             </div>
             <div class="row d-flex justify-content-center">
@@ -94,7 +97,7 @@
                                 </svg></div>
                             <div class="px-2">
                                 <h6 class="mb-0">Email</h6>
-                                <p class="mb-0">info@sociale.com</p>
+                                <p class="mb-0">info@sociale.live</p>
                             </div>
                         </div>
                         <div class="d-flex align-items-center p-3">
@@ -110,11 +113,37 @@
                 </div>
                 <div class="col-md-6 col-lg-5 col-xl-4">
                     <div>
-                        <form class="p-3 p-xl-4" method="post">
-                            <div class="mb-3"><input class="form-control" type="text" id="name-1" name="name" placeholder="Name"></div>
-                            <div class="mb-3"><input class="form-control" type="email" id="email-1" name="email" placeholder="Email"></div>
-                            <div class="mb-3"><textarea class="form-control" id="message-1" name="message" rows="6" placeholder="Message"></textarea></div>
-                            <div><button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701;">Send </button></div>
+                        <form id="ContactForm" class="p-3 p-xl-4" method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                {% if messages %}
+                                    <div class="messages">
+                                        {% for message in messages %}
+                                            <div class="alert {{ message.tags }}"  style="font-weight: bold; color: #FC6701; ">
+                                                {{ message }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.name }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.email }}
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.message }}
+                            </div>
+                                {% if form.non_field_errors %}
+                                <div class="mb-3">
+                                    {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            <div><button id="ContactFormBtn" class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color:#fc6701 ;">Send </button></div>
                         </form>
                     </div>
                 </div>
@@ -122,5 +151,17 @@
         </div>
     </section>
     <script src = "{% static 'base/assets/bootstrap/js/bootstrap.min.js' %}" ></script>
+    <script>
+        
+        document.getElementById('ContactForm').addEventListener('submit', function(event) {
+            const submitBtn = document.getElementById('ContactFormBtn');
+            let counter = 0
+            function wait(){
+                submitBtn.innerHTML = "Wait"+".".repeat(counter%4);
+                counter++;
+            }
+            setInterval(wait, 400) 
+        });
+    </script>
 </body>
 {% endblock %}

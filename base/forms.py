@@ -1,5 +1,6 @@
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
+from django.core.validators import EmailValidator
 from django import forms
 
 class CreateUserForm(UserCreationForm):
@@ -27,6 +28,11 @@ class LoginUserForm(AuthenticationForm):
             "Either username or password is not correct. Please try again."
         )
     }
+
+class ContactForm(forms.Form):
+    name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'Name'}))
+    email = forms.CharField(validators=[EmailValidator()],widget=forms.EmailInput(attrs={'class': 'form-control','placeholder':'Email'}))
+    message = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control','placeholder':'Message','rows' :'6'}))
     
     
     
