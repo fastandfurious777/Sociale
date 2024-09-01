@@ -113,7 +113,7 @@
                 </div>
                 <div class="col-md-6 col-lg-5 col-xl-4">
                     <div>
-                        <form class="p-3 p-xl-4" method="post">
+                        <form id="ContactForm" class="p-3 p-xl-4" method="post">
                             {% csrf_token %}
                             <div class="mb-3">
                                 {% if messages %}
@@ -143,7 +143,7 @@
                                     {% endfor %}
                                 </div>
                                 {% endif %}
-                            <div><button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color:#fc6701 ;">Send </button></div>
+                            <div><button id="ContactFormBtn" class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color:#fc6701 ;">Send </button></div>
                         </form>
                     </div>
                 </div>
@@ -151,5 +151,17 @@
         </div>
     </section>
     <script src = "{% static 'base/assets/bootstrap/js/bootstrap.min.js' %}" ></script>
+    <script>
+        
+        document.getElementById('ContactForm').addEventListener('submit', function(event) {
+            const submitBtn = document.getElementById('ContactFormBtn');
+            let counter = 0
+            function wait(){
+                submitBtn.innerHTML = "Wait"+".".repeat(counter%4);
+                counter++;
+            }
+            setInterval(wait, 400) 
+        });
+    </script>
 </body>
 {% endblock %}

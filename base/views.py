@@ -4,22 +4,29 @@ from django.contrib import messages
 from . forms import CreateUserForm, LoginUserForm, ContactForm
 from django.contrib.auth.models import User
 from bike_map.models import Bike, Rental
+from . import mails
+
 
 def home(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            #TODO
-            messages.success(request, 'All good... We will get back to you shortly!')
-            return redirect('home')
-        else:
-            messages.success(request, 'Something went wrong :( , consider contacting us on IG ')
+            name = request.POST['name']
+            email = request.POST['email']
+            message = request.POST['message']
+            try:
+                mails.contact_confirmation(email)
+                mails.contact_inbox(name,email,message)
+                messages.success(request, 'All good... We will get back to you shortly!')
+            except Exception:
+                messages.success(request, 'Something went wrong :( , consider contacting us on IG ')
+            return redirect('home')                       
     else:
         context = {
             'form': ContactForm(),
             'available_bikes': Bike.objects.count(),
             'active_users': User.objects.filter(is_active=True).count(),
-            #Assuming one rental equals one bus fare 
+            #Assuming one rental equals one bus fare (1$)
             'dollars_saved': Rental.objects.count()
         }
         return render(request, 'base/index.html', context)
