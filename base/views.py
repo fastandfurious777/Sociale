@@ -1,10 +1,11 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from . forms import CreateUserForm, LoginUserForm, ContactForm
+from . forms import CreateUserForm, LoginUserForm, ContactForm, PasswordResetForm
 from django.contrib.auth.models import User
 from bike_map.models import Bike, Rental
 from . import mails
+from django.http import HttpResponse
 
 
 def home(request):
@@ -57,3 +58,16 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+def password_reset_view(request):
+    if request.method == "POST":
+        form  = PasswordResetForm(request.POST)
+        if form.is_valid():
+            user = User.objects.filter(email = request.POST["email"]).first()
+            if user is not None:
+                return HttpResponse('<h1>Success</h1>')
+            #TODO send mail to client with password reset link
+            return HttpResponse('<h1>Failuere</h1>')
+    else:
+        form = PasswordResetForm()
+        return render(request, 'base/password-reset.html', {'form': form})
