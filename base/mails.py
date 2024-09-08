@@ -21,8 +21,8 @@ def contact_inbox(name,email,message):
         fail_silently=False
     )
 
-def password_reset(email):
-    message = f'Reset your password here: {settings.HOST}'
+def password_reset(email,uuid):
+    message = f'Reset your password here: {settings.HOST}password-reset/{uuid}'
     send_mail(
         'Reset your Password',
         message,

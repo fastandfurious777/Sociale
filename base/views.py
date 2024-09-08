@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth import login, logout
 from django.contrib import messages
-from . forms import CreateUserForm, LoginUserForm, ContactForm, PasswordResetForm
+from . forms import CreateUserForm, LoginUserForm, ContactForm,RequestResetForm, PasswordResetForm
 
 from django.contrib.auth.models import User
 from bike_map.models import Bike, Rental
@@ -66,7 +66,7 @@ def logout_view(request):
 
 def password_reset_view(request):
     if request.method == "POST":
-        form  = PasswordResetForm(request.POST)
+        form  = RequestResetForm(request.POST)
         if form.is_valid():
             user = User.objects.filter(email = request.POST["email"]).first()
             if user is not None:
@@ -76,9 +76,23 @@ def password_reset_view(request):
                     reset.set_uuid(user=user)
                 else:
                     reset.set_uuid(user=user)
-                #mails.password_reset(user.email)
+                mails.password_reset(user.email,reset.uuid)
                 return HttpResponse('<h1>Success</h1>')  
             return HttpResponse('<h1>Failuere</h1>')
     else:
-        form = PasswordResetForm()
-        return render(request, 'base/password-reset.html', {'form': form})
+        form = RequestResetForm()
+        return render(request, 'base/request-reset.html', {'form': form})
+
+def verify_reset_view(request,uuid):
+    if request.method == 'POST':
+        return HttpResponse("<h1> SUccess</h1>")
+    else:
+        reset = ResetPassword.objects.filter(uuid = uuid).first()
+        if reset: #TODO Outdated uuids should be deleted
+            form = PasswordResetForm()
+            return render(request, 'base/password-reset.html', {'form': form})
+        else:
+            return HttpResponse("<h1> Failure </h1>")
+
+
+    

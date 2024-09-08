@@ -34,5 +34,9 @@ class ContactForm(forms.Form):
     email = forms.CharField(validators=[EmailValidator()],widget=forms.EmailInput(attrs={'class': 'form-control','placeholder':'Email'}))
     message = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control','placeholder':'Message','rows' :'6'}))
 
-class PasswordResetForm(forms.Form):
+class RequestResetForm(forms.Form):
     email = forms.CharField(validators=[EmailValidator()],widget=forms.EmailInput(attrs={'class': 'form-control','placeholder':'Email'}))
+
+class PasswordResetForm(forms.Form):
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Password'}))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Confirm'}))
