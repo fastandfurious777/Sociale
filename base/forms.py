@@ -40,3 +40,12 @@ class RequestResetForm(forms.Form):
 class PasswordResetForm(forms.Form):
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Password'}))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Confirm'}))
+
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+
+        if len(password) < 8:
+            raise forms.ValidationError("Your password is too short")
+        else:
+            return password
+

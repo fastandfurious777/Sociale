@@ -11,16 +11,8 @@
                             <form class="text-center" method="post">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    {{ form.password1 }}
-                                    {% for error in form.password1.errors %}
-                                    <p>{{ error }}</p>
-                                    {% endfor %}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.password2 }}
-                                    {% for error in form.password2.errors %}
-                                    <p>{{ error }}</p>
-                                    {% endfor %}
+                                    {{ form.email }}
+                                    {{ form.email.errors }}
                                 </div>
 
                                 {% if form.non_field_errors %}
@@ -32,9 +24,9 @@
                                 {% endif %}
                                 
                                 <div class="mb-3">
-                                    <button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color: #fc6701;">Reset</button></div>
+                                    <button class="btn btn-primary d-block w-100" type="submit" style="background: #fc6701; border-color: #fc6701;">Reset</button>
+                                </div>
                             </form>
-                            
                         </div>
                     </div>
                 </div>

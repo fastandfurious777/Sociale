@@ -85,7 +85,15 @@ def password_reset_view(request):
 
 def verify_reset_view(request,uuid):
     if request.method == 'POST':
-        return HttpResponse("<h1> SUccess</h1>")
+        form = PasswordResetForm(request.POST)
+        if form.is_valid():
+            new_password = request.POST['password1']
+            user = ResetPassword.objects.get(uuid=uuid).user
+            user.set_password(new_password)
+            user.save()           
+            return HttpResponse("<h1> Success</h1>")
+        else:
+            return render(request, 'base/password-reset.html', {'form': form})
     else:
         reset = ResetPassword.objects.filter(uuid = uuid).first()
         if reset: #TODO Outdated uuids should be deleted

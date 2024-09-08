@@ -25,9 +25,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1_6zz+^7dl2oe&-6vipw3-_-g2&m2ux1cw6qb@^^8xk_u8h%*7'
 # CIPHER_KEY = os.getenv("CIPHER_KEY")
-
+HOST = os.environ.get('HOST', default="http://localhost:8000/")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'inbox.sociale@gmail.com'
