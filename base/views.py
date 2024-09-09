@@ -77,8 +77,8 @@ def password_reset_view(request):
                 else:
                     reset.set_uuid(user=user)
                 mails.password_reset(user.email,reset.uuid)
-                return HttpResponse('<h1>Success</h1>')  
-            return HttpResponse('<h1>Failuere</h1>')
+                return HttpResponse("<p>All good, check your email</p>") 
+            return HttpResponse("<p>Something went wrong... </p>") 
     else:
         form = RequestResetForm()
         return render(request, 'base/request-reset.html', {'form': form})
@@ -87,20 +87,29 @@ def verify_reset_view(request,uuid):
     if request.method == 'POST':
         form = PasswordResetForm(request.POST)
         if form.is_valid():
-            new_password = request.POST['password1']
-            user = ResetPassword.objects.get(uuid=uuid).user
-            user.set_password(new_password)
-            user.save()           
-            return HttpResponse("<h1> Success</h1>")
+            try:
+                reset = ResetPassword.objects.get(uuid=uuid)
+                new_password = request.POST['password1']
+                user = reset.user
+                #Delete used token
+                reset.delete()
+                user.set_password(new_password)
+                user.save()       
+                return HttpResponse("<p>Your password was set successfully, <a href = '/login/'>Login</a></p>")
+            except:
+                return HttpResponse("<p>Something went wrong, <a href = '/' Contact Us</a></p>")
         else:
             return render(request, 'base/password-reset.html', {'form': form})
     else:
         reset = ResetPassword.objects.filter(uuid = uuid).first()
-        if reset: #TODO Outdated uuids should be deleted
+        print(reset)
+        if reset is None: 
+            return HttpResponse("<p>Wrong token, generate a <a href ='/password-reset/'>new one</a></p>")
+        elif reset.last_updated < timezone.now() - timezone.timedelta(hours=1):
+            return HttpResponse("<p>Your token has expired, generate a <a href ='/password-reset/'>new one</a></p>")
+        else:
             form = PasswordResetForm()
             return render(request, 'base/password-reset.html', {'form': form})
-        else:
-            return HttpResponse("<h1> Failure </h1>")
 
 
     
