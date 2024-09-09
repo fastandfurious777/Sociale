@@ -76,9 +76,13 @@ def password_reset_view(request):
                     reset.set_uuid(user=user)
                 else:
                     reset.set_uuid(user=user)
-                mails.password_reset(user.email,reset.uuid)
-                return HttpResponse("<p>All good, check your email</p>") 
-            return HttpResponse("<p>Something went wrong... </p>") 
+                try:
+                    mails.password_reset(user.email,reset.uuid)
+                except:
+                    return HttpResponse("<p>We have encountered a server error, report a bug on @Sociale.x</p>")
+                return HttpResponse("<p>All good, check your email</p>")
+            else:
+                return HttpResponse("<p>Your account doesnt exist... </p>") 
     else:
         form = RequestResetForm()
         return render(request, 'base/request-reset.html', {'form': form})
