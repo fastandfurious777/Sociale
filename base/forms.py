@@ -33,6 +33,19 @@ class ContactForm(forms.Form):
     name = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control','placeholder':'Name'}))
     email = forms.CharField(validators=[EmailValidator()],widget=forms.EmailInput(attrs={'class': 'form-control','placeholder':'Email'}))
     message = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control','placeholder':'Message','rows' :'6'}))
-    
-    
-    
+
+class RequestResetForm(forms.Form):
+    email = forms.CharField(validators=[EmailValidator()],widget=forms.EmailInput(attrs={'class': 'form-control','placeholder':'Email'}))
+
+class PasswordResetForm(forms.Form):
+    password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Password'}))
+    password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control','placeholder':'Confirm'}))
+
+    def clean_password1(self):
+        password = self.cleaned_data.get('password1')
+
+        if len(password) < 8:
+            raise forms.ValidationError("Your password is too short")
+        else:
+            return password
+

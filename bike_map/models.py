@@ -1,4 +1,5 @@
 from django.db import models
+from shapely.geometry import Polygon, Point
 from django.contrib.auth.models import User
 from django.utils import timezone
 
@@ -10,6 +11,7 @@ class Bike(models.Model):
     is_available = models.BooleanField()
     last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT)
     last_updated = models.DateTimeField(auto_now=True)
+    
     def __str__(self):
         return self.name
 
@@ -36,3 +38,25 @@ class Rental(models.Model):
         self.bike.lon = lon
         self.bike.save()
         self.save()
+
+class Polygon(models.Model):
+    name = models.CharField(max_length=100)
+    #Polygon points stored as JSON list
+    poly = models.JSONField()
+
+    def __init__(self, coords):
+        if type(coords) == tuple:
+            self.poly = {"coords": coords}
+            self.save()
+        else:
+            print("Invalid Type")
+        
+    def contains_point(self, lat, lon):
+        #((0., 0.), (0., 1.), (1., 1.), (1., 0.), (0., 0.))
+        if self.poly:
+            polygon = Polygon(self.poly["coords"])
+            point = Point(lat,lon)
+            return polygon.contains_point(point)
+        else:
+            return False
+

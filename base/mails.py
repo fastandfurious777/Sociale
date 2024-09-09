@@ -20,3 +20,13 @@ def contact_inbox(name,email,message):
         ['inbox.sociale@gmail.com'],
         fail_silently=False
     )
+
+def password_reset(email,uuid):
+    message = f'Reset your password here: {settings.HOST}password-reset/{uuid}'
+    send_mail(
+        'Reset your Password',
+        message,
+        settings.EMAIL_HOST_USER,
+        [email],
+        fail_silently=False
+    )
