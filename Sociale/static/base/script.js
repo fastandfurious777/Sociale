@@ -3,7 +3,7 @@ async function runApp(){
   const menuButton = document.getElementById('menuButton');
   const menuHeader = document.getElementById('menuHeader');
   const userName = menuHeader.getAttribute('context-username');
-  initMap();
+  window.init = initMap();
   let currentStep;
   async function getUserStatus(){
     response = await fetch("/map/get-user-status/")
@@ -63,12 +63,18 @@ async function GetBikeCode(bike_id,link) {
   
 }
 
-
 async function GetBikes(){
   const response = await fetch("/map/get-bike-positions/");
   const responseData = await response.json();
   return responseData.bikes
 }
+
+async function GetPolygons(){
+  const response = await fetch("/map/get-polygons/");
+  const responseData = await response.json();
+  return responseData.polygons
+}
+
 async function AddMarker(bike){
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
   const marker = new AdvancedMarkerElement({
@@ -122,6 +128,20 @@ async function SetMarkers(){
     }
   }
 }
+async function SetPolygons(){
+  const polygons = await GetPolygons()
+  for (let poly of polygons){
+    const polygon = new google.maps.Polygon({
+    paths: poly.coords,
+    strokeColor: "#2ad438",
+    strokeOpacity: 0.8,
+    strokeWeight: 2,
+    fillColor: "#2ad438",
+    fillOpacity: 0.35
+    });
+    polygon.setMap(map);
+  }
+}
 
 async function endRide(link) {
   if (navigator.geolocation) {
@@ -164,8 +184,15 @@ async function endRide(link) {
       center: { lat: 50.063481, lng: 19.932906 },
       zoom: 16,
       disableDefaultUI: true,
-      mapId: 'f203d7d130752d37'});
+      mapId: 'f203d7d130752d37'
+    });
 
+ 
+
+  // Create the polygon
+  // 
+
+  await SetPolygons();
   await SetMarkers();
   setInterval(SetMarkers, 10000);
 }
