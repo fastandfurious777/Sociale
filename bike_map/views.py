@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.contrib.auth.decorators import login_required
-from .models import Bike, Rental
+from .models import Bike, Rental, Parking
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -22,6 +22,21 @@ def get_bike_positions(request):
     bikes = Bike.objects.filter(is_available=True).values()
     return JsonResponse(
         {"bikes": list(bikes)}
+    )
+
+def get_polygons(request):
+    parkings = Parking.objects.all()
+    response = []
+    
+    for parking in parkings:
+        response.append(
+            {
+                "name": parking.name,
+                "coords": [{"lat":coord[0],"lng":coord[1]} for coord in parking.coords]
+            }
+        )
+    return JsonResponse(
+        {"polygons": list(response)}
     )
 
 def get_user_status(request):

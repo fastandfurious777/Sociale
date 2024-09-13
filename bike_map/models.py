@@ -3,6 +3,8 @@ from shapely.geometry import Polygon, Point
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+import ast
+
 class Bike(models.Model):
     name = models.CharField(max_length=100)
     lat = models.FloatField()
@@ -39,24 +41,28 @@ class Rental(models.Model):
         self.bike.save()
         self.save()
 
-class Polygon(models.Model):
+class Parking(models.Model):
     name = models.CharField(max_length=100)
     #Polygon points stored as JSON list
-    poly = models.JSONField()
-
-    def __init__(self, coords):
-        if type(coords) == tuple:
-            self.poly = {"coords": coords}
-            self.save()
-        else:
-            print("Invalid Type")
+    _coords = models.TextField(db_column="coords")
         
     def contains_point(self, lat, lon):
         #((0., 0.), (0., 1.), (1., 1.), (1., 0.), (0., 0.))
-        if self.poly:
-            polygon = Polygon(self.poly["coords"])
+        if self.coords:
+            polygon = Polygon(ast.literal_eval(self.coords))
             point = Point(lat,lon)
             return polygon.contains_point(point)
         else:
             return False
+        
+    @property
+    def coords(self):
+        return ast.literal_eval(self._coords)
+
+    @coords.setter
+    def coords(self, value):
+        if isinstance(value, tuple):
+            self._coords = str(value)
+        else:
+            raise ValueError("Coords must be a tuple")
 
