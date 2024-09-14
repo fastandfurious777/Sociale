@@ -46,14 +46,15 @@ class Parking(models.Model):
     #Polygon points stored as JSON list
     _coords = models.TextField(db_column="coords")
         
-    def contains_point(self, lat, lon):
-        #((0., 0.), (0., 1.), (1., 1.), (1., 0.), (0., 0.))
+    def contains_point(self, usrcoords):
+        print(self.coords)
         if self.coords:
-            polygon = Polygon(ast.literal_eval(self.coords))
-            point = Point(lat,lon)
-            return polygon.contains_point(point)
+            polygon = Polygon(self.coords)
+            print(polygon)
+            point = Point(usrcoords)
+            return point.within(polygon)
         else:
-            return False
+            raise AttributeError("Coords were not set")
         
     @property
     def coords(self):
@@ -61,8 +62,8 @@ class Parking(models.Model):
 
     @coords.setter
     def coords(self, value):
-        if isinstance(value, tuple):
-            self._coords = str(value)
-        else:
-            raise ValueError("Coords must be a tuple")
+        self._coords = str(value)
+        
+        # else:
+        #     raise ValueError("Coords must be a tuple")
 
