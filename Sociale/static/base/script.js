@@ -19,7 +19,8 @@ async function runApp(){
 
   async function updateUI(){
     if (currentStep === 'scan') {
-      menuButton.textContent = 'Scan';
+      menuButton.textContent = '';
+      menuButton.insertAdjacentHTML('beforeend', '<i class="fa-solid fa-qrcode"></i> Scan');
       menuHeader.textContent = `Hello, ${userName}`;
       menuButton.onclick = () => window.location.href = "/map/scanner/";
     } else if (currentStep === 'start') {
@@ -41,15 +42,17 @@ async function runApp(){
       menuHeader.textContent = 'Enjoy your trip!';
       menuButton.onclick = async () => {
         response = await endRide("/map/end-rental/");
-        if (response ==200){
+        if (response.status ==200){
           currentStep = 'scan';
-        }else if (response ==400){
-          menuHeader.textContent = 'You cant end ride here';    
+          updateUI();
+        }else if (response.status ==400){
+          currentStep="end"
+          menuHeader.textContent="You can't park here"
+          console.log(menuHeader.textContent)   
         }
-        
-        updateUI();
       };
-   }};
+   }
+  };
 
   if (sessionStorage.getItem('bike_id')) {
     currentStep = 'start';
@@ -82,9 +85,26 @@ async function GetPolygons(){
 
 async function AddMarker(bike){
   const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  const {PinElement} = await google.maps.importLibrary("marker");
+  
+  const icon = document.createElement("div");
+  icon.innerHTML = '<i class="fa-solid fa-bicycle" style="color: white; font-size: 16px;"></i>';
+  await new Promise(resolve => {
+    if (document.readyState === "complete") resolve();
+    else window.addEventListener('load', resolve);
+  });
+
+
+  const pinUI = new PinElement({
+    //background: "#fc6701",
+    background: "#fc6701",
+    borderColor: "#fc6701",
+    glyph:  icon,
+  });
   const marker = new AdvancedMarkerElement({
     map,
     position: { lat: bike.lat, lng: bike.lon },
+    content: pinUI.element,
   });     
   markers.push(
     {
@@ -183,8 +203,14 @@ async function endRide(link) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(location)});
-  console.log(response)
+    return response
 }
+async function centerMap(){
+  let startLocation = await getLocation()
+  map.setCenter({lat: startLocation.lat, lng: startLocation.lon});
+  console.log({lat: startLocation.lat, lng: startLocation.lon})
+}
+
 
 (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
     key: "AIzaSyDqaEmMUlCcnwrTtVb0e467mhQryaPAJTI",
@@ -197,7 +223,7 @@ async function endRide(link) {
 
   async function initMap() {
   const { Map } = await google.maps.importLibrary("maps");
-  //const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+  const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
 
   map = new Map(document.getElementById("map"), {
       center: { lat: 50.063481, lng: 19.932906 },
@@ -205,8 +231,45 @@ async function endRide(link) {
       disableDefaultUI: true,
       mapId: 'f203d7d130752d37'
     });
+    //Creates user current location marker
+    const user = new AdvancedMarkerElement({
+      map,
+      position: {lat: 0, lng: 0},
+      content: userMarker()
+    });
+    function userMarker() {
+      const div = document.createElement('div');
+      div.style.width = '16px';
+      div.style.height = '16px';
+      div.style.backgroundColor = '#fc6701'; 
+      div.style.border = '1.5px solid white'; 
+      div.style.borderRadius = '50%'; 
+      return div
+    }
 
+    function updatePosition(position) {
+      const userPosition = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
+      user.position = userPosition;
+    }
+
+    function errorAlerts(error){
+      alert(error)
+    }
+
+    //Watch position for tracking user location
+    if (navigator.geolocation) {
+      navigator.geolocation.watchPosition(updatePosition,errorAlerts,{ enableHighAccuracy: true, maximumAge: 0 } );
+    } else {
+      alert("Geolocation is not supported by your browser.");
+    }
+
+  
+  
   await SetPolygons();
   await SetMarkers();
+  await centerMap();
   setInterval(SetMarkers, 10000);
 }
