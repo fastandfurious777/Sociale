@@ -72,13 +72,13 @@ async function GetBikeCode(bike_id,link) {
 }
 
 async function GetBikes(){
-  const response = await fetch("/map/get-bike-positions/");
+  const response = await fetch("/map/bikes?active=true");
   const responseData = await response.json();
   return responseData.bikes
 }
 
 async function GetPolygons(){
-  const response = await fetch("/map/get-polygons/");
+  const response = await fetch("/map/polygons/");
   const responseData = await response.json();
   return responseData.polygons
 }

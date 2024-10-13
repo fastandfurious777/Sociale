@@ -1,44 +1,88 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .models import Bike, Rental, Parking
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from . utils import valid_location
+
 # from cryptography.fernet import Fernet
 # from django.conf import settings
 
 @login_required
 def home(request):
     user = request.user
-    return render(request,"bike_map/map-index.html",context={"user": user})
-
+    return render(request, "bike_map/map-index.html", context={"user": user})
 
 @login_required
 def scanner(request):
     return render(request,"bike_map/scanner.html")
 
-@login_required
-def get_bike_positions(request):
-    bikes = Bike.objects.filter(is_available=True).values()
-    return JsonResponse(
-        {"bikes": list(bikes)}
-    )
-
-def get_polygons(request):
-    parkings = Parking.objects.all()
-    response = []
-    
-    for parking in parkings:
-        response.append(
-            {
-                "name": parking.name,
-                "coords": [{"lat":coord[0],"lng":coord[1]} for coord in parking.coords]
-            }
+#@login_required
+def bike_list(request):
+    if request.method == 'GET':
+        active_param = request.GET.get('active', None)
+        if active_param is not None:
+            if active_param.lower() in ['true','yes','1']:
+                bikes = Bike.objects.filter(is_available=True).values()
+            elif active_param.lower() in ['false','no','0']:
+                bikes = Bike.objects.filter(is_available=True).values()
+            else:
+                return JsonResponse(
+                    {"error": "Invalid 'active' parameter"}, status=400
+                )
+        else:
+            bikes = Bike.objects.all().values()
+        return JsonResponse(
+            {"bikes": list(bikes)}, status=200
         )
-    return JsonResponse(
-        {"polygons": list(response)}
-    )
+    else:
+        return JsonResponse(
+            {"error": "Bad request"}, status=400
+        )
+    
+def bike_management(request, id):
+    if request.method == 'GET':
+        bike = Bike.objects.filter(id=id).first()
+        if bike is not None:
+            return JsonResponse(
+                {
+                    'id': bike.id,
+                    'name': bike.name,
+                    'is_available': bike.is_available
+                }, status = 200
+            )
+        else:
+            return JsonResponse(
+                {"error": "Not found"}, status = 404
+            )
+    #TODO    
+    elif request.method == 'POST':
+        # Create bike 
+        pass
+    elif request.method == 'PUT':
+        # Update bikes properties
+        pass
+    elif request.method == 'DELETE':
+        # Update bikes properties
+        pass
+
+def polygon_list(request):
+    if request.method == 'GET':
+        parkings = Parking.objects.all()
+        response = []
+        for parking in parkings:
+            response.append(
+                {
+                    "name": parking.name,
+                    "coords": [{"lat":coord[0],"lng":coord[1]} for coord in parking.coords]
+                }
+            )
+        return JsonResponse(
+            {"polygons": list(response)}, status=200
+        )
+def polygon_management(request,id):
+    pass
 
 def get_user_status(request):
     user = request.user
