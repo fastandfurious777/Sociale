@@ -9,9 +9,9 @@ class Bike(models.Model):
     name = models.CharField(max_length=100)
     lat = models.FloatField()
     lon = models.FloatField()
-    code = models.IntegerField()
+    code = models.TextField()
     is_available = models.BooleanField()
-    last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT)
+    last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     last_updated = models.DateTimeField(auto_now=True)
     
     def __str__(self):

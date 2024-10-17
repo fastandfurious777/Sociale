@@ -5,14 +5,15 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from . utils import valid_location
+from django.conf import settings
 
 # from cryptography.fernet import Fernet
 # from django.conf import settings
 
-@login_required
+#@login_required
 def home(request):
     user = request.user
-    return render(request, "bike_map/map-index.html", context={"user": user})
+    return render(request, "bike_map/map-index.html", context={"user": user, "api_key": settings.GMAPS_KEY})
 
 @login_required
 def scanner(request):
@@ -24,23 +25,46 @@ def bike_list(request):
         active_param = request.GET.get('active', None)
         if active_param is not None:
             if active_param.lower() in ['true','yes','1']:
-                bikes = Bike.objects.filter(is_available=True).values()
+                bikes = Bike.objects.filter(is_available=True)
             elif active_param.lower() in ['false','no','0']:
-                bikes = Bike.objects.filter(is_available=True).values()
+                bikes = Bike.objects.filter(is_available=True)
             else:
                 return JsonResponse(
                     {"error": "Invalid 'active' parameter"}, status=400
                 )
         else:
-            bikes = Bike.objects.all().values()
+            bikes = Bike.objects.all()
         return JsonResponse(
-            {"bikes": list(bikes)}, status=200
-        )
+            {"bikes": [{'bike_id': bike.id,
+            'name': bike.name,'is_available': bike.is_available, 
+            'lat':bike.lat, 'lon':bike.lon } for bike in bikes]}, status=200 )
+    elif request.method == 'POST':
+        data = json.loads(request.body.decode('utf-8'))
+        try:
+            name = str(data["name"])
+            available = bool(data["is_available"])
+            lat = float(data["lat"])
+            lon = float(data["lon"])
+            code = data["code"]
+            if 49.94 >= lat or lat >= 50.13:
+                raise ValueError
+            if 19.80 >= lon or lon >= 20.12:
+                raise ValueError
+        except:
+            return JsonResponse(
+                {"message": "Bad request"}, status = 400
+            )
+        new_bike = Bike(name=name,is_available=available,lat=lat,lon=lon,code=code,last_taken_by_id=None)
+        new_bike.save()
+        return JsonResponse(
+                {"message": "Success"}, status = 200
+            )
     else:
         return JsonResponse(
             {"error": "Bad request"}, status=400
         )
     
+@csrf_exempt
 def bike_management(request, id):
     if request.method == 'GET':
         bike = Bike.objects.filter(id=id).first()
@@ -49,23 +73,43 @@ def bike_management(request, id):
                 {
                     'id': bike.id,
                     'name': bike.name,
-                    'is_available': bike.is_available
+                    'is_available': bike.is_available,
+                    'lat':bike.lat, 'lon':bike.lon
                 }, status = 200
             )
         else:
             return JsonResponse(
                 {"error": "Not found"}, status = 404
-            )
-    #TODO    
-    elif request.method == 'POST':
-        # Create bike 
-        pass
+            )  
     elif request.method == 'PUT':
-        # Update bikes properties
-        pass
+        SUPPORTED_FIELDS = ["name","is_available", "lat", "lon", "code"]
+        bike = Bike.objects.filter(id=id).first()
+        data = json.loads(request.body.decode('utf-8'))
+        if bike is None:
+            return JsonResponse(
+                {"message": "Not found"}, status = 404
+            )
+        for key in data:
+                if key in SUPPORTED_FIELDS and data[key] is not None:
+                    setattr(bike,key,data[key])
+                else:
+                    return JsonResponse(
+                        {"message":"Bad request"}, status = 400
+                    )
+        bike.save()
+        return JsonResponse(
+            {"message":"Success"}, status = 200
+        ) 
     elif request.method == 'DELETE':
-        # Update bikes properties
-        pass
+        bike = Bike.objects.filter(id=id).first()
+        if bike is None:
+            return JsonResponse(
+                {"message": "Not found"}, status = 404
+            )
+        bike.delete()
+        return JsonResponse(
+                {"message": "Success"}, status = 200
+            )
 
 def polygon_list(request):
     if request.method == 'GET':
