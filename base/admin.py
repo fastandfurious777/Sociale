@@ -10,7 +10,7 @@ class BikeAdmin(admin.ModelAdmin):
     list_display = ["name","lat","lon","is_available","last_taken_by","last_updated"]
 class RentalAdmin(admin.ModelAdmin):
     model = Rental
-    list_display = ["user","bike","start_time","end_time"]
+    list_display = ["user","bike","started_at","finished_at"]
 
 admin.site.register(Bike,BikeAdmin)
 admin.site.register(Rental,RentalAdmin)

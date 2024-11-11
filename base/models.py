@@ -4,9 +4,9 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.gis.db import models
-from django.contrib.gis.geos import Point
 from rest_framework.exceptions import ValidationError
+from shapely import Point, Polygon
+import ast
 
 class Bike(models.Model):
     name = models.CharField(max_length=100)
@@ -40,19 +40,35 @@ class Rental(models.Model):
 
 class Parking(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    coords = models.PolygonField()
+    coords = models.TextField()
         
     def contains_point(self, lon: float, lat: float) -> bool:
-        """Checks if a given point (latitude, longitude) is within the parking area"""
-        polygon = self.coords.prepared
-        return polygon.contains(Point(lon, lat))
+        """Checks if a given point (longitude, latitude) is within the parking area"""
+        polygon: Polygon =  self.get_polygon_from_coords()
+        point = Point(lon, lat)
+        print(list(polygon.exterior.coords))
+        return polygon.contains(point)
+    
+    def get_polygon_from_coords(self) -> Polygon:
+        """Convert a string representation of a list (coords) to a list object"""
+        converted_coords: list = ast.literal_eval(self.coords)
+        return Polygon(converted_coords)
     
     def clean(self):
-        #checks if polygon is inside cracow 
-        #add geodjango to project
-        raise ValidationError({"detail": "Parking area cannot exceeed Krakow"})
+        # Checks if polygon is inside Krakow
+        krakow = Polygon([
+        (19.934227, 50.151481),
+        (20.147812, 50.114320),
+        (20.169171, 49.957535),
+        (19.812178, 49.941828),
+        (19.766410 , 50.182752)
+        ])
+        polygon: Polygon = self.get_polygon_from_coords()
+        if not polygon.within(krakow):
+            raise ValidationError({"detail": "Parking area cannot exceeed Krakow"})
+        #Later more validation will be implemented, but who knows when :) 
     
-
+#After refactoring the reset should be improved
 class ResetPassword(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     uuid = models.UUIDField(default = uuid.uuid4,unique=True)
