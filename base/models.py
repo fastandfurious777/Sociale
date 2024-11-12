@@ -1,12 +1,10 @@
-import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
-from django.db import models
-from django.contrib.auth.models import User
 from rest_framework.exceptions import ValidationError
 from shapely import Point, Polygon
 import ast
+import uuid
 
 class Bike(models.Model):
     name = models.CharField(max_length=100)
@@ -46,7 +44,6 @@ class Parking(models.Model):
         """Checks if a given point (longitude, latitude) is within the parking area"""
         polygon: Polygon =  self.get_polygon_from_coords()
         point = Point(lon, lat)
-        print(list(polygon.exterior.coords))
         return polygon.contains(point)
     
     def get_polygon_from_coords(self) -> Polygon:

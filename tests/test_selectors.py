@@ -1,5 +1,5 @@
 from django.test import TestCase
-from base.models import Bike
+from base.models import Bike, Parking
 from base.selectors import (
     bike_list,
     bike_get,
@@ -8,6 +8,7 @@ from base.selectors import (
     rental_list,
     rental_get)
 from django.http import Http404
+from .coords import DB
 
 
 
@@ -41,18 +42,25 @@ class BikeSelectorsTests(TestCase):
 
 class ParkingSelectorsTests(TestCase):
     def setUp(self):
-        pass
+        Parking.objects.create(name="Ruczaj", coords=DB['ruczaj'])
+        Parking.objects.create(name="Bronowice", coords=DB['bronowice'])
+        Parking.objects.create(name="Inwalidow", coords=DB['inwalidow'])
+
 
     def test_parking_list(self):
         """Test a selector that lists all parkings"""
-        #result = parking_list()
+        result = parking_list()
         
-        #self.assertEqual(len(result), 3)
+        self.assertEqual(len(result), 3)
+        self.assertEqual(result[0].name, "Ruczaj")
+        self.assertEqual(result[0].coords, '[(19.906198, 50.018914),(19.911552, 50.018065), (19.909752, 50.016239), (19.903646, 50.017568)]')
+        self.assertEqual(result[2].name, "Inwalidow")
 
 
     def test_parking_get(self):
         """Test a selector that gets parking by id"""
-        pass
+        with self.assertRaises(Http404):
+            parking_get(id=4)
 
 class RentalSelectorsTests(TestCase):
     def setUp(self):
