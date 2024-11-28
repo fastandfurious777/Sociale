@@ -1,9 +1,10 @@
 
-from rest_framework.response import Response
-from rest_framework import serializers, status
-from rest_framework.views import APIView
-from bike_map.selectors import bike_list, bike_get
-from bike_map.services import bike_create, bike_update, bike_delete
+from rest_framework.response import Response # type: ignore
+from rest_framework.request import Request # type: ignore
+from rest_framework import serializers, status # type: ignore
+from rest_framework.views import APIView # type: ignore
+from base.selectors import bike_list, bike_get
+from base.services import bike_create, bike_update, bike_delete
 
 class BikeListApi(APIView):
     class OutputSerializer(serializers.Serializer):
@@ -12,7 +13,7 @@ class BikeListApi(APIView):
         lon = serializers.FloatField()
         lat = serializers.FloatField()
 
-    def get(self, request):
+    def get(self, request: Request) -> Response:
         bikes = bike_list()
 
         serializer = self.OutputSerializer(bikes, many=True).data
@@ -26,13 +27,13 @@ class BikeDetailApi(APIView):
         lon = serializers.FloatField()
         lat = serializers.FloatField()
 
-    def get(self, request, bike_id):
+    def get(self, request: Request, bike_id: int):
         bike = bike_get(id=bike_id)
-        if bike is not None:
-            serializer = self.OutputSerializer(bike).data
-            return Response(serializer)
-        content = {'message': 'Bike not found'}
-        return Response(content,status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.OutputSerializer(bike).data
+        
+        return Response(serializer)
+
     
 class BikeCreateApi(APIView):
     class InputSerializer(serializers.Serializer):
@@ -41,7 +42,7 @@ class BikeCreateApi(APIView):
         lat = serializers.FloatField()
         is_available = serializers.BooleanField()
 
-    def post(self, request):
+    def post(self, request: Request):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -55,8 +56,9 @@ class BikeUpdateApi(APIView):
         lon = serializers.FloatField(required=False)
         lat = serializers.FloatField(required=False)
         is_available = serializers.BooleanField(required=False)
+        last_taken_by = serializers.IntegerField(required=False)
 
-    def post(self, request, bike_id):
+    def post(self, request: Request, bike_id: int):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
@@ -68,57 +70,7 @@ class BikeUpdateApi(APIView):
 class BikeDeleteApi(APIView):
     #Maby authentication?
 
-    def delete(self, request, bike_id: int):
+    def delete(self, request: Request, bike_id: int):
         bike_delete(id=bike_id)
 
         return Response(status=status.HTTP_200_OK)
-        
-"""
-@csrf_exempt
-def bike_management(request, id):
-    if request.method == 'GET':
-        bike = Bike.objects.filter(id=id).first()
-        if bike is not None:
-            return JsonResponse(
-                {
-                    'id': bike.id,
-                    'name': bike.name,
-                    'is_available': bike.is_available,
-                    'lat':bike.lat, 'lon':bike.lon
-                }, status = 200
-            )
-        else:
-            return JsonResponse(
-                {"error": "Not found"}, status = 404
-            )  
-    elif request.method == 'PUT':
-        SUPPORTED_FIELDS = ["name","is_available", "lat", "lon", "code"]
-        bike = Bike.objects.filter(id=id).first()
-        data = json.loads(request.body.decode('utf-8'))
-        if bike is None:
-            return JsonResponse(
-                {"message": "Not found"}, status = 404
-            )
-        for key in data:
-                if key in SUPPORTED_FIELDS and data[key] is not None:
-                    setattr(bike,key,data[key])
-                else:
-                    return JsonResponse(
-                        {"message":"Bad request"}, status = 400
-                    )
-        bike.save()
-        return JsonResponse(
-            {"message":"Success"}, status = 200
-        ) 
-    elif request.method == 'DELETE':
-        bike = Bike.objects.filter(id=id).first()
-        if bike is None:
-            return JsonResponse(
-                {"message": "Not found"}, status = 404
-            )
-        bike.delete()
-        return JsonResponse(
-                {"message": "Success"}, status = 200
-            )
-
-"""

@@ -48,7 +48,7 @@ class Parking(models.Model):
     
     def get_polygon_from_coords(self) -> Polygon:
         """Convert a string representation of a list (coords) to a list object"""
-        converted_coords: list = ast.literal_eval(self.coords)
+        converted_coords: list[tuple[float, float]] = ast.literal_eval(self.coords)
         return Polygon(converted_coords)
     
     def clean(self):

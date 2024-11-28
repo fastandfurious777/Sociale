@@ -8,7 +8,7 @@ from . selectors import user_get, bike_get, rental_get, rental_get_current
 from cryptography import fernet
 from Sociale.settings import CIPHER_KEY
 from datetime import datetime
-from utils import date_validate, parking_location_validate
+from .utils import date_validate, parking_location_validate
 
 def bike_create(*,name: str, lon: float, lat: float, code: str, is_available: bool) -> Bike:
     if isinstance(CIPHER_KEY, str):
@@ -49,7 +49,7 @@ def bike_delete(id: int) -> None:
     bike = get_object_or_404(Bike, id = id)
     bike.delete()
 
-def rental_create(user_id: int, bike_id: int) -> None:
+def rental_create(*,user_id: int, bike_id: int) -> None:
         start_time: datetime = timezone.now()
         bike: Bike = bike_get(id=bike_id)
         user: User = user_get(id=user_id)
@@ -81,6 +81,10 @@ def rental_update(id: int, data: Dict[str, Any]) -> None:
 
     rental.save()
 
+def rental_delete(id: int):
+    rental = get_object_or_404(Rental, id = id)
+    rental.delete()
+
 
 def rental_start(user_id: int, bike_id: int) -> None:
         rental_create(user_id=user_id, bike_id=bike_id)
@@ -107,6 +111,27 @@ def rental_finish(user_id: int, bike_id: int, lon: float, lat: float) -> None:
         'user':user_id
         }
         bike_update(id=bike_id, data=bike_data)
+
+def parking_create(name: str, coords: Iterable[str]):
+    parking = Parking(name, coords)
+    parking.full_clean()
+    parking.save()
+
+def parking_update(id: int, data: Dict[str, Any]):
+    parking = get_object_or_404(Parking, id = id)
+
+    if data['name'] is not None:
+        parking.name = data['name']
+    if data['coords'] is not None:
+        parking.coords = data['coords']
+    
+    parking.full_clean()
+
+    parking.save()
+
+def parking_delete(id: int):
+    parking = get_object_or_404(Parking, id = id)
+    parking.delete()
          
 
 

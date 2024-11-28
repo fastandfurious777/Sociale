@@ -28,12 +28,16 @@ def rental_list() -> Iterable[Rental]:
 def rental_get(id: int) -> Rental:
     return get_object_or_404(Rental, id = id)
 
-def rental_get_current(started_by: User) -> Rental:
+def rental_get_current(started_by: int) -> Rental:
     """Gets active rental for a client"""
-    query = Q(finished_at=None,user=started_by)
-    rental = Rental.objects.filter(query)
-    if not rental.exists():
+    user = user_get(id=started_by)
+    query = Q(finished_at=None,user=user)
+
+    try:
+        rental = Rental.objects.get(query)
+    except Rental.DoesNotExist:
         raise Http404
-    if rental.count() > 1:
+    except Rental.MultipleObjectsReturned:
         raise APIException({"detail": "User has more than one rentals active"})
+    
     return rental
