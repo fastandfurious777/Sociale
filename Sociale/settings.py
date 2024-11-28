@@ -25,10 +25,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-1_6zz+^7dl2oe&-6vipw3-_-g2&m2ux1cw6qb@^^8xk_u8h%*7'
 # CIPHER_KEY = os.getenv("CIPHER_KEY")
+MAPS_KEY = os.getenv("MAPS_KEY")
+CIPHER_KEY = os.getenv("CIPHER_KEY")
+
 HOST = os.environ.get('HOST', default="http://localhost:8000/")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'inbox.sociale@gmail.com'
@@ -43,7 +47,6 @@ ALLOWED_HOSTS = ['192.168.1.58','127.0.0.1','localhost']
 # Application definition
 
 INSTALLED_APPS = [
-    'bike_map.apps.BikeMapConfig',
     'base.apps.BaseConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -51,6 +54,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -131,7 +136,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
-    "Sociale/static",
+    BASE_DIR / 'base' / 'static',
 ]
 
 # Default primary key field type

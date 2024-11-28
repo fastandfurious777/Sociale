@@ -1,5 +1,6 @@
 body {
-  background: #f3f4f5;
+  /*background: #f3f4f5;*/
+  background: linear-gradient(-60deg, #ff5858 0%, #f09819 100%), #ffffff;
 }
 
 .btn {
@@ -21,4 +22,3 @@ body {
   border: 1px solid #dfe3e7 ;
   padding-left: 0px;
 }
-
