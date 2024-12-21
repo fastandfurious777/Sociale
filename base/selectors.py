@@ -6,11 +6,14 @@ from django.contrib.auth.models import User
 from rest_framework.exceptions import APIException
 from django.http import Http404
 
+def user_list() -> Iterable[User]:
+    return User.objects.all()
+
 def user_get(id: int) -> User:
     return get_object_or_404(User,id=id)
 
 def bike_list() -> Iterable[Bike]:
-    query = Q(is_available=True)
+    query: Q = Q(is_available=True)
     return Bike.objects.filter(query)
 
 def bike_get(id: int) -> Bike:
@@ -30,11 +33,11 @@ def rental_get(id: int) -> Rental:
 
 def rental_get_current(started_by: int) -> Rental:
     """Gets active rental for a client"""
-    user = user_get(id=started_by)
-    query = Q(finished_at=None,user=user)
+    user: User = user_get(id=started_by)
+    query: Q = Q(finished_at=None,user=user)
 
     try:
-        rental = Rental.objects.get(query)
+        rental: Rental = Rental.objects.get(query)
     except Rental.DoesNotExist:
         raise Http404
     except Rental.MultipleObjectsReturned:

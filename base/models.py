@@ -25,6 +25,11 @@ class Bike(models.Model):
             raise ValidationError({"detail": "Longtitude cannot exceeed Krakow"})
         if self.lat<min_lat or self.lat>max_lat:
             raise ValidationError({"detail":"Latitude cannot exceeed Krakow"})
+    
+    @classmethod
+    def class_name(cls):
+        return "Bike"
+
         
 class Rental(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
@@ -35,6 +40,10 @@ class Rental(models.Model):
     def clean(self):
         if self.started_at >= self.finished_at:
             raise ValidationError({"detail": "'finished_at' cannot be before 'started_at'"})
+    
+    @classmethod
+    def class_name(cls):
+        return "Rental"
 
 class Parking(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -64,6 +73,10 @@ class Parking(models.Model):
         if not polygon.within(krakow):
             raise ValidationError({"detail": "Parking area cannot exceeed Krakow"})
         #Later more validation will be implemented, but who knows when :) 
+
+    @classmethod
+    def class_name(cls):
+        return "Rental"
     
 #After refactoring the reset should be improved
 class ResetPassword(models.Model):
