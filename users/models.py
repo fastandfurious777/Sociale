@@ -3,37 +3,32 @@ from django.db import models
 from django.utils import timezone
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email: str, password: str, first_name:str, last_name: str):
+    def create_user(self, email, password, is_active=False, is_verified=False):
         """Creates and returns user"""
         if not email:
             raise ValueError("The Email field is required")
-        if not first_name:
-            raise ValueError("The First Name field is required")
-        if not last_name:
-            raise ValueError("The Last Name field is required")
         if not password:
             raise ValueError("The Password field is required")
 
         user = self.model(
-            email=self.normalize_email(email),
-            first_name=first_name,
-            last_name=last_name
+            email=self.normalize_email(email.lower()),
+            is_active=is_active,
+            is_verified=is_verified
         )
 
         user.set_password(password)
+        user.full_clean()
         user.save(using=self._db)
+
         return user
 
-    def create_superuser(self, email: str, password: str, first_name: str, last_name: str):
+    def create_superuser(self, email, password):
         """Creates and returns superuser"""
         user = self.create_user(
             email=email,
             password=password,
-            first_name=first_name,
-            last_name=last_name
         )
 
-        user.is_staff = True
         user.is_superuser = True
         user.save(using=self._db)
         return user
@@ -51,25 +46,33 @@ class User(AbstractUser):
         verbose_name='date joined', 
         default=timezone.now
     )
-    last_active_at = models.DateTimeField(
-        verbose_name='last active', 
-        default=timezone.now,
+    verified_at = models.DateTimeField(
+        verbose_name='date verified',
         null=True
     )
+    last_active_at = models.DateTimeField(
+        verbose_name='last active', 
+        default=timezone.now
+    )
 
-    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(verbose_name='active user', default=False)
     is_verified = models.BooleanField(verbose_name='verified email', default=False)
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    REQUIRED_FIELDS = []
 
     def deactivate(self):
         self.is_active = False
         self.save()
+    
+    def verify(self):
+        self.verified_at = timezone.now()
+        self.is_verified = True
 
     @property
     def is_eligible(self):
         return self.is_active and self.is_verified
+
+# TODO last logged in should be changed after user logges in ( by default)
