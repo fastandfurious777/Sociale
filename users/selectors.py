@@ -1,5 +1,5 @@
 from django.db.models import Q, QuerySet
-from django.contrib.auth.models import User
+from . models import User
 
 def user_list() -> QuerySet[User]:
     return User.objects.all()
