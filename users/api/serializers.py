@@ -51,4 +51,8 @@ class ResetPasswordSerializer(serializers.Serializer):
         data.pop('confirmed_password')
         return data
     
+class VerifyEmailSerializer(serializers.Serializer):
+    uid = serializers.CharField(write_only=True)
+    token = serializers.CharField(write_only=True)
+    
 

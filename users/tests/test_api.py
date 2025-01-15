@@ -2,7 +2,8 @@ from users.models import User
 from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 from django.urls import reverse
-from django.core.cache import cache
+from django.core import cache, mail
+import re
 
 
 class UserApiTests(APITestCase):
@@ -25,7 +26,7 @@ class UserApiTests(APITestCase):
         cls.client = APIClient()
 
     def tearDown(self):
-        cache.clear()
+        cache.cache.clear()
 
     def login(self, email, password):
         url = reverse('users:login')
@@ -87,6 +88,23 @@ class UserApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         user = User.objects.get(email=data['email'])
         self.assertFalse(user.is_verified)
+        self.assertEqual(mail.outbox[0].subject, 'Verify your account')
+
+        
+        verification_link = re.search( r'http[s]?://\S+', mail.outbox[0].body).group().split('/')
+        token = verification_link[-1]
+        uid = verification_link[-2]
+
+        url = reverse('users:verify-email')
+        response = self.client.post(url, data={'uid': uid, 'token': token})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        user.refresh_from_db()
+        self.assertTrue(user.is_active)
+    
+    def test_verify_email_invalid_data(self):
+        url = reverse('users:verify-email')
+        response = self.client.post(url, data={'uid': 'invalid', 'token': 'invalid'})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_register_existing_email(self):
         url = reverse('users:register')
@@ -131,3 +149,23 @@ class UserApiTests(APITestCase):
         url = reverse('users:delete', args=[self.random_user.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+    
+    def test_password_reset(self):
+        url = reverse('users:reset-password-request')
+        response = self.client.post(url, {'email': self.active_user.email})
+        self.assertEqual(mail.outbox[0].subject, 'Reset your password')
+        verification_link = re.search( r'http[s]?://\S+', mail.outbox[0].body).group().split('/')
+        token = verification_link[-1]
+        uid = verification_link[-2]
+        url = reverse('users:reset-password-check')
+        password = 'pass123'
+        response = self.client.put(url, {'uid': uid, 'token': token, 'password': password, 'confirmed_password': password})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.active_user.refresh_from_db()
+        self.assertTrue(self.active_user.check_password(password))
+    
+    def test_password_reset_invalid_email(self):
+        url = reverse('users:reset-password-request')
+        response = self.client.post(url, {'email': 'idontexist@sociale.com'})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        self.assertEqual(len(mail.outbox), 0)

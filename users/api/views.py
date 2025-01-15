@@ -18,6 +18,7 @@ from .serializers import (
     UpdateSerializer,
     ResetPasswordRequestSerializer,
     ResetPasswordSerializer,
+    VerifyEmailSerializer,
 )
 
 
@@ -66,7 +67,7 @@ class UserRegisterApi(APIView):
 
         try:
             send_verification_email(user.email, uid, token)
-        except Exception:
+        except Exception as e:
             #TODO add logger
             return Response({"detail": "Something unexpected happened."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -123,16 +124,21 @@ class UserDeleteApi(AdminPermissionMixin, APIView):
 
 
 class VerifyEmailApi(APIView):
-    def post(self, request, uid, token):
+    serializer_class = VerifyEmailSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
         try:
-            user_id = int(force_str(urlsafe_base64_decode(uid)))
+            user_id = int(force_str(urlsafe_base64_decode(data['uid'])))
             user = user_get(user_id=user_id)
             if user is None:
                 return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND) 
         except (TypeError, ValueError, OverflowError):
             return Response({"detail": "Invalid verification data"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if default_token_generator.check_token(user, token):
+        if default_token_generator.check_token(user, data['token']):
             user_update(user_id=user_id, data={'is_active': True})
             return Response({"detail": "Account verified successfully"},status=status.HTTP_200_OK)
         else:
@@ -179,7 +185,9 @@ class ResetPasswordCheckApi(APIView):
             return Response({"detail": "User not found"}, status=status.HTTP_404_NOT_FOUND)
     
         if default_token_generator.check_token(user, data['token']):
-            user_update(user_id=user_id, data={'password': data['password']})
+            user.set_password(data['password'])
+            user.full_clean()
+            user.save()
             return Response({"detail": "Your password has been changed successfully"},status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
