@@ -96,7 +96,16 @@ class UserDetailApi(AdminPermissionMixin, APIView):
         serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+class UserCreateApi(AdminPermissionMixin, APIView):
+    serializer_class = RegisterSerializer
 
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user_create(**serializer.validated_data)
+
+        return Response({"detail": "Account created."}, status=status.HTTP_201_CREATED)
+    
 class UserUpdateApi(AdminPermissionMixin, APIView):
     serializer_class = UpdateSerializer
 
@@ -108,7 +117,7 @@ class UserUpdateApi(AdminPermissionMixin, APIView):
             return Response({"detail": "Updated successfully"}, status=status.HTTP_200_OK)
         return Response(
             {"detail": "Update failed"},
-            status=status.HTTP_404_NOT_FOUND
+            status=status.HTTP_400_BAD_REQUEST
         )
 
 
