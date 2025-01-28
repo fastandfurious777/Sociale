@@ -1,0 +1,1 @@
+Hi, yours verification link  is {{ verification_link }}

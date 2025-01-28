@@ -1,6 +1,6 @@
 from . models import Bike, Rental, Parking
 from django.contrib.auth.models import User
-from typing import  Any, Dict, Iterable
+from typing import  Any, Dict, List, Iterable
 from rest_framework.exceptions import ValidationError, APIException # type: ignore
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -10,11 +10,43 @@ from Sociale.settings import CIPHER_KEY
 from datetime import datetime
 from .utils import date_validate, parking_location_validate
 
+
+def user_create(*, username: str, email: str, password: str):
+    user: User = User(username=username, email=email, password=password)
+
+    user.full_clean()
+
+    user.save()
+
+
+def user_update(id: int, data: Dict[str, str]) -> User:
+    user = user_get(id=id)
+    fields: List[str] = ['username', 'email', 'password'] 
+
+    for record in data:
+        if record in fields:
+            setattr(user, record, data['record'])
+        else:
+            # TODO add logger , validation error shouldn't give to much info in production 
+            raise ValidationError({'detail':f"Field '{record}' doesnt exist in 'user' "})
+        
+    user.full_clean()
+    user.save()
+    return user
+        
+
+def user_delete(id: int):
+    user = user_get(id=id)
+
+    user.delete()
+
 def bike_create(*,name: str, lon: float, lat: float, code: str, is_available: bool) -> Bike:
     if isinstance(CIPHER_KEY, str):
         key = CIPHER_KEY.encode()
     else:
-        raise APIException("CIPHER_KEY must be a string")
+        # TODO Log CIPHER_KEY is not a string
+        # return error number for user eg 21201
+        raise APIException("")
     
     cipher = fernet.Fernet(key)
     enrypted_code = cipher.encrypt(code.encode())
@@ -31,7 +63,7 @@ def bike_create(*,name: str, lon: float, lat: float, code: str, is_available: bo
 
 def bike_update(id: int, data: Dict[str, Any]) -> Bike:
     bike = bike_get(id=id)
-    fields: list[str] = ['name', 'lon', 'lat', 'is_available', 'last_taken_by'] 
+    fields: List[str] = ['name', 'lon', 'lat', 'is_available', 'last_taken_by'] 
     for record in data:
         if record in fields:
             if record == 'last_taken_by':
@@ -46,7 +78,7 @@ def bike_update(id: int, data: Dict[str, Any]) -> Bike:
     return bike
 
 def bike_delete(id: int) -> None:
-    bike = get_object_or_404(Bike, id = id)
+    bike = bike_get(id = id)
     bike.delete()
 
 def rental_create(*,user_id: int, bike_id: int) -> None:
