@@ -1,18 +1,19 @@
 from . selectors import parking_get
 from . models import Parking
+from django_rest.exceptions import ValidationError
 
-def parking_create(*, name: str, area: dict[str], capacity: int, is_active=None):
-
+def parking_create(*, name: str, area: dict[str], capacity: int, is_active=None) -> None:
     parking = Parking(
         name=name,
         area=area,
         capacity=capacity,
         is_active=is_active
     )
+    
     parking.full_clean()
     parking.save()
 
-def parking_update(parking_id: int, data: dict[str]):
+def parking_update(parking_id: int, data: dict[str]) -> None:
     parking = parking_get(parking_id=parking_id)
 
     fields: list[str] = ['name', 'area', 'capacity', 'is_active'] 
@@ -26,6 +27,6 @@ def parking_update(parking_id: int, data: dict[str]):
 
     parking.save()
 
-def parking_delete(parking_id: int):
+def parking_delete(parking_id: int) -> None:
     parking = parking_get(parking_id=parking_id)
     parking.delete()

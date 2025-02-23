@@ -12,7 +12,7 @@ def parking_get(parking_id: int) -> Parking | None:
     try:
         return Parking.objects.get(id=parking_id)
     except Parking.DoesNotExist:
-        raise Http404("Parking not found")
+        raise Http404()
 
 def check_parking_location(lon: float, lat: float) -> bool:
     parkings = parking_list_active()
