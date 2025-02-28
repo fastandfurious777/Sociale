@@ -1,7 +1,7 @@
 from django.db import models
-from shapely import Polygon, Point, from_geojson
-from django_rest.exceptions import ValidationError
-import json
+from shapely import Point
+from rest_framework.exceptions import ValidationError
+from . utils import validate_polygon
 
 class Parking(models.Model):
     name = models.CharField(max_length=255)
@@ -13,25 +13,18 @@ class Parking(models.Model):
         
     def contains_point(self, lon, lat):
         """Checks if a given point (longitude, latitude) is within the parking area"""
-        polygon =  self.get_polygon_from_coords()
+        polygon =  self.get_polygon_from_area()
         point = Point(lon, lat)
         return polygon.contains(point)
     
-    def get_polygon_from_coords(self):
+    def get_polygon_from_area(self):
         """Converts a GeoJSON into a Polygon"""
-        return from_geojson(self.area)
-    
-    def clean(self):
-        if "type" not in self.area or "coordinates" not in self.area:
-            raise ValidationError({"area": "Area must be a valid GeoJSON dictionary"})
-
-        if self.area["type"] != "Polygon":
-            raise ValidationError({"area": "Only 'Polygon' type is supported"})
-
-        polygon = self.get_polygon_from_coords()
-
-        with open("boundary.json", "r") as file:
-            boundary = from_geojson(json.loads(file))
+        return validate_polygon(self.area)
         
-        if not polygon.within(boundary):
-            raise ValidationError({"area": "Parking area cannot exceed outer boundaries"})
+    def clean(self):
+        polygon = self.get_polygon_from_area()
+
+        boundary = Parking.objects.filter(name="boundary").first()
+        
+        if boundary is not None and not polygon.within(boundary.get_polygon_from_area()):
+            raise ValidationError({"detail": "Parking area cannot exceed outer boundaries"})
