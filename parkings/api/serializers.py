@@ -1,5 +1,6 @@
-from django_rest import serializers
+from rest_framework import serializers
 from parkings.models import Parking
+from parkings.utils import validate_polygon
 
 class ParkingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,11 +15,10 @@ class ParkingCreateSerializer(serializers.ModelSerializer):
     is_active = serializers.BooleanField(required=False) 
 
     def validate(self, data):
-        if "type" not in data and "coordinates" not in data: 
-            raise serializers.ValidationError("Invalid GEOJSON object")
-        if data["type"] != "Polygon":
-            raise serializers.ValidationError("Area must be a 'Polygon' type ")
+        if "area" not in data:
+            raise serializers.ValidationError({"detail": "'area' field is required."})
         
+        validate_polygon(data["area"])
         return data
 
 
@@ -26,12 +26,9 @@ class ParkingUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=50, required=False)
     area = serializers.JSONField(required=False)
     capacity = serializers.IntegerField(required=False)
-    is_active = serializers.BoolField(required=False) 
+    is_active = serializers.BooleanField(required=False) 
 
-    def validate(self, data):
-        if "type" not in data and "coordinates" not in data: 
-            raise serializers.ValidationError("Invalid GEOJSON object")
-        if data["type"] != "Polygon":
-            raise serializers.ValidationError("Area must be a 'Polygon' type ")
-        
+    def validate(self, data: dict):
+        if data.get("area"):
+            validate_polygon(data["area"])
         return data

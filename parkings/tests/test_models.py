@@ -1,8 +1,8 @@
 from django.test import TestCase
 from parkings.models import Parking
 from rest_framework.exceptions import ValidationError
+
 class ParkingTests(TestCase):
-    
     @classmethod
     def setUpTestData(cls):
         parking_area = {
