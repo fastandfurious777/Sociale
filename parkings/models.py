@@ -4,9 +4,9 @@ from rest_framework.exceptions import ValidationError
 from . utils import validate_polygon
 
 class Parking(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     area = models.JSONField() 
-    capacity = models.IntegerField(blank=True, null=True)
+    capacity = models.IntegerField(default=10)
     is_active = models.BooleanField(default=True) 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -22,6 +22,12 @@ class Parking(models.Model):
         return validate_polygon(self.area)
         
     def clean(self):
+        if self.capacity <= 0:
+            raise ValidationError({"detail": "Capacity must be greater than zero."})
+
+        if Parking.objects.exclude(id=self.id).filter(name=self.name).exists():
+            raise ValidationError({"detail": "Parking with this name already exists."})
+    
         polygon = self.get_polygon_from_area()
 
         boundary = Parking.objects.filter(name="boundary").first()
