@@ -1,84 +1,68 @@
-from . serializers import ParkingSerializer, ParkingCreateSerializer, ParkingUpdateSerializer
 from rest_framework.views import APIView
-from rest_framework import permissions, authentication, status
+from rest_framework import status
 from rest_framework.response import Response
-from django.http import Http404
-from django.core.exceptions import ValidationError as DjangoValidationError
-from django_rest.exceptions import ValidationError as RestValidationError
 
 from parkings.selectors import parking_list, parking_get
 from parkings.services import parking_create, parking_update, parking_delete
+from utils.permissions import EligiblePermissionMixin, AdminPermissionMixin
+from . serializers import ParkingSerializer, ParkingCreateSerializer, ParkingUpdateSerializer
 
-# GET, LIST, CREATE, UPDATE, DELETE only by admin
-
-
-class AdminPermissionMixin:
-    """Mixin to enforce admin only access and session auth"""
-    authentication_classes = [authentication.SessionAuthentication]
-    permission_classes = [permissions.IsAdminUser]
-
-class ParkingListApi(APIView, AdminPermissionMixin):
+class ParkingListApi(EligiblePermissionMixin, APIView):
     serializer_class = ParkingSerializer
 
     def get(self, request):
-        parkings = parking_list()
+        user = request.user
+        include_inactive = request.query_params.get("include_inactive")
+
+        if user.is_staff and include_inactive:
+            parkings = parking_list(include_inactive=True)
+        elif not user.is_staff and include_inactive:
+            return Response( 
+                {"detail": "Forbidden: You cannot include inactive parkings."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        else:
+            parkings = parking_list()
 
         serializer = self.serializer_class(parkings, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-class ParkingDetailApi(APIView, AdminPermissionMixin):
+class ParkingDetailApi(AdminPermissionMixin, APIView):
     serializer_class = ParkingSerializer
     
     def get(self, request, parking_id) -> Response:
-        try:
-            parking = parking_get(id=parking_id)
-        except Http404:
-            return Response({"detail": "Parking not found"},  status=status.HTTP_404_NOT_FOUND)
+        parking = parking_get(parking_id=parking_id)
 
         serializer = self.serializer_class(parking)
 
         return Response(serializer.data,  status=status.HTTP_200_OK)
 
-class ParkingCreateApi(APIView, AdminPermissionMixin):
+class ParkingCreateApi(AdminPermissionMixin, APIView):
     serializer_class = ParkingCreateSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        try:
-            parking_create(**serializer.validated_data)
-        except RestValidationError as rest_error:
-            return Response({"detail": str(rest_error)} ,status=status.HTTP_400_BAD_REQUEST)
-        except DjangoValidationError as django_error:
-            return Response({"detail": str(django_error)},status=status.HTTP_400_BAD_REQUEST)
+        parking_create(**serializer.validated_data)
 
         return Response(status=status.HTTP_201_CREATED)
     
-class ParkingUpdateApi(APIView):
+class ParkingUpdateApi(AdminPermissionMixin, APIView):
     serializer_class = ParkingUpdateSerializer
 
-    def post(self, request, parking_id):
+    def put(self, request, parking_id):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
-        try:
-            parking_update(id=parking_id, data=data)
-        except Http404:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        except RestValidationError as rest_error:
-            return Response({"detail": str(rest_error)} ,status=status.HTTP_400_BAD_REQUEST)
-        except DjangoValidationError as django_error:
-            return Response({"detail": str(django_error)},status=status.HTTP_400_BAD_REQUEST)
+
+        parking_update(parking_id=parking_id, data=data)
 
         return Response(status=status.HTTP_200_OK)
-
-class ParkingDeleteApi(APIView):
+    
+class ParkingDeleteApi(AdminPermissionMixin, APIView):
     def delete(self, request, parking_id):
-        try:
-            parking_delete(id=parking_id)
-        except Http404:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+        parking_delete(parking_id=parking_id)
 
         return Response(status=status.HTTP_200_OK)

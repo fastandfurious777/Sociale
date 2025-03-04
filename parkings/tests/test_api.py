@@ -53,7 +53,18 @@ class ParkingApiTests(APITestCase):
                      [19.895648, 50.009341], [19.896595, 50.008492]]
                 ]
             }
-        )    
+        )  
+        cls.inactive_parking = Parking.objects.create(
+            name="TempParking",
+            area={
+                "type": "Polygon",
+                "coordinates": [
+                    [[19.894835, 50.009293], [19.895590, 50.010333], 
+                     [19.897441, 50.009824], [19.894835, 50.009293]]
+                ]
+            },
+            is_active=False
+        )  
 
     def tearDown(self):
         cache.clear()
@@ -64,6 +75,41 @@ class ParkingApiTests(APITestCase):
     def parking_create(self, data):
         url = reverse('parkings:create')
         return self.client.post(url, data=data, format='json')
+
+    def test_parking_list_noauth(self):
+        url = reverse('parkings:list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_parking_list(self):
+        url = reverse('parkings:list')
+        self.authenticate(self.active_user)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        response = self.client.get(f'{url}?include_inactive=True')
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_parking_list_including_inactive(self):
+        url = reverse('parkings:list')
+        self.authenticate(self.admin)
+        response = self.client.get(url)
+        response = self.client.get(f'{url}?include_inactive=True')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    def test_parking_get(self):
+        url = reverse('parkings:detail', args=[self.parking.id])
+        self.authenticate(self.admin)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data.get('area'), self.parking.area)
+
+    def test_parking_get_nonexistent(self):
+        url = reverse('parkings:detail', args=[000])
+        self.authenticate(self.admin)
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_parking_create_noauth(self):
         response = self.parking_create(self.parking_data)

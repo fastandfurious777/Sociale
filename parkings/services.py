@@ -2,7 +2,7 @@ from . selectors import parking_get
 from . models import Parking
 from rest_framework.exceptions import ValidationError
 
-def parking_create(*, name: str, area: dict[str], capacity: int=10, is_active: bool=True) -> None:
+def parking_create(*, name: str, area: dict[str], capacity: int = 10, is_active: bool = True) -> None:
     parking = Parking(
         name=name,
         area=area,

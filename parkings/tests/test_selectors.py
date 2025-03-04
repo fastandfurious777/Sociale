@@ -2,7 +2,6 @@ from django.test import TestCase
 from parkings.models import Parking
 from parkings.selectors import (
     parking_list, 
-    parking_list_active,
     parking_get,
     parking_get_by_name,
     check_parking_location
@@ -13,14 +12,15 @@ class TestParkingSelectors(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-
         active_parking_area = {
             "type": "Polygon", 
-            "coordinates": [[[0, 0], [0, 4], [4, 4], [4, 0], [0, 0]]]}
+            "coordinates": [[[0, 0], [0, 4], [4, 4], [4, 0], [0, 0]]]
+        }
         inactive_parking_area = {
             "type": "Polygon",
             "coordinates": [[[5, 5], [10, 10], [0, 10], [5, 5]]]
         }
+        
         cls.active_parking = Parking.objects.create(
             name="ActiveParking", area=active_parking_area, is_active=True
         ) 
@@ -29,11 +29,11 @@ class TestParkingSelectors(TestCase):
         ) 
 
     def test_parking_list(self):
-        parkings = parking_list()
+        parkings = parking_list(include_inactive=True)
         self.assertEqual(parkings.count(), 2)
 
     def test_parking_list_active(self):
-        parkings = parking_list_active()
+        parkings = parking_list()
         self.assertEqual(parkings.count(), 1)
         self.assertEqual(parkings[0].name, "ActiveParking")
 
