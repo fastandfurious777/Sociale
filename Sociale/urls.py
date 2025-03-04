@@ -19,7 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('base.urls')),
-    #path('map/', include('bike_map.urls')),
-    path('', include('api.urls')),
+    path('users/', include('users.api.urls', namespace='users')),
+    path('parkings/', include('parkings.api.urls', namespace='parkings')),
 ]

@@ -42,12 +42,15 @@ EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 ALLOWED_HOSTS = ['192.168.1.58','127.0.0.1','localhost']
+AUTH_USER_MODEL = 'users.User'
+FRONTEND_URL = 'http://localhost'
 
 
 # Application definition
 
 INSTALLED_APPS = [
-    'base.apps.BaseConfig',
+    'users.apps.UsersConfig',
+    'parkings.apps.ParkingsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -73,7 +76,9 @@ ROOT_URLCONF = 'Sociale.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'utils', 'templates')
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -135,9 +140,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [
-    BASE_DIR / 'base' / 'static',
-]
+# STATICFILES_DIRS = [
+#     BASE_DIR / 'base' / 'static',
+# ]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
