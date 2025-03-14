@@ -15,7 +15,7 @@ class Bike(models.Model):
         editable = False
         ) 
     is_available = models.BooleanField()
-    last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+    last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
     
     def clean(self) -> None:
