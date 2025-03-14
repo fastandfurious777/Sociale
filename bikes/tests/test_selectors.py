@@ -1,6 +1,4 @@
 from django.test import TestCase
-from parkings.models import Parking
-from rest_framework.exceptions import ValidationError
 from bikes.models import Bike
 from bikes.selectors import bike_get, bike_list
 from django.http import Http404
@@ -9,12 +7,6 @@ from django.http import Http404
 class BikeTests(TestCase):
     @classmethod
     def setUpTestData(cls):
-        boundary_area = {
-            "type": "Polygon",
-            "coordinates": [[[0, 0], [0, 3], [3, 3], [3, 0], [0, 0]]]
-        }
-        cls.boundary = Parking.objects.create(name="boundary", area=boundary_area)
-
         cls.bike_available = Bike.objects.create(
             name="BikeAv",
             lon=1, lat=1,
