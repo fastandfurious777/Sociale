@@ -1,4 +1,4 @@
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, APIException
 from django.utils import timezone
 from django.db import transaction
 
@@ -6,6 +6,7 @@ from rentals.selectors import rental_get, rental_get_current_by_user
 from rentals.models import Rental
 from users.selectors import user_get
 from bikes.selectors import bike_get
+from parkings.selectors import check_parking_location
 
 
 @transaction.atomic
@@ -35,9 +36,12 @@ def rental_finish(user_id: int, lon: float, lat: float):
     rental.status = Rental.Status.FINISHED
     rental.full_clean()
     rental.save()
+    if check_parking_location(lon=lon, lat=lat):
+        rental.bike.return_bike(lon=lon, lat=lat)
+        rental.bike.save()
+    else:
+        raise APIException(detail={'detail': "You are not in the parking area"}, code=400)
 
-    rental.bike.return_bike(lon=lon, lat=lat)
-    rental.bike.save()
 
 
 def rental_update(rental_id: int, data):

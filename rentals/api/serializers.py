@@ -27,4 +27,4 @@ class RentalUpdateSerializer(serializers.Serializer):
     def validate_status(self, value: str):
         if value.upper() not in Rental.Status.values:
             raise serializers.ValidationError("Invalid status")
-    return value.upper()
+        return value.upper()

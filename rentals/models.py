@@ -27,7 +27,8 @@ class Rental(models.Model):
             raise ValidationError({"detail": "Rental finish date cannot be before the start date"})
 
         # Excluding self.id ensures the current rental is not mistakenly checked against itself,
-        # preventing an error when updating an existing rental.
+        # preventing an error when updating an existing rental.)
         query = models.Q(user=self.user, status=self.Status.STARTED)
+        print(Rental.objects.filter(query))
         if Rental.objects.filter(query).exclude(id=self.id).exists():
             raise ValidationError({"detail": "You cannot have more than one rental started"})
