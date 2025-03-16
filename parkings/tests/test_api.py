@@ -55,7 +55,7 @@ class ParkingApiTests(APITestCase):
             }
         )  
         cls.inactive_parking = Parking.objects.create(
-            name="TempParking",
+            name="InactiveParking",
             area={
                 "type": "Polygon",
                 "coordinates": [

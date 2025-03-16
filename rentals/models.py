@@ -24,7 +24,7 @@ class Rental(models.Model):
     )
     def clean(self):
         if self.finished_at and self.started_at >= self.finished_at:
-            raise ValidationError({"detail": "'finished_at' cannot be before 'started_at'"})
+            raise ValidationError({"detail": "Rental finish date cannot be before the start date"})
 
         # Excluding self.id ensures the current rental is not mistakenly checked against itself,
         # preventing an error when updating an existing rental.
