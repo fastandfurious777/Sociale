@@ -14,7 +14,7 @@ def bike_get(bike_id: int) -> Bike:
         return Bike.objects.get(id=bike_id)
     except Bike.DoesNotExist:
         raise Http404("Bike not found")
-    
+
 def bike_get_by_qrcode(qr_code) -> Bike:
     try:
         return Bike.objects.get(qr_code=qr_code)
