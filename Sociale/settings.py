@@ -51,6 +51,8 @@ FRONTEND_URL = 'http://localhost'
 INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'parkings.apps.ParkingsConfig',
+    'bikes.apps.BikesConfig',
+    'rentals.apps.RentalsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

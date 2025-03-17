@@ -10,14 +10,25 @@ class Bike(models.Model):
     lon = models.FloatField()
     lat = models.FloatField()
     code = models.IntegerField(max_length=10)
-    qr_code = models.UUIDField( 
-        default = uuid.uuid4, 
+    qr_code = models.UUIDField(
+        default = uuid.uuid4,
         editable = False
         ) 
     is_available = models.BooleanField()
     last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
     last_updated = models.DateTimeField(auto_now=True)
-    
+  
+    def rent(self, user: User):
+        if not self.is_available:
+            raise ValidationError(detail={"detail": "Bike is already rented"})
+        self.is_available = False
+        self.last_taken_by = user
+
+    def return_bike(self, lon: float, lat: float):
+        self.is_available = True
+        self.lon = lon
+        self.lat = lat
+
     def clean(self) -> None:
         boundary = Parking.objects.filter(name="boundary").first()
         point = Point(self.lon, self.lat)
