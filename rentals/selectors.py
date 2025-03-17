@@ -5,14 +5,16 @@ from django.http import Http404
 from rentals.models import Rental
 from users.selectors import user_get
 
-def rental_list(user_id: int , status: str):
+def rental_list(params: dict = {}) -> list[Rental]:
+    user_id = params.get("user_id")
+    status = params.get("status")
     query = Q()
     if user_id is not None:
         user = user_get(user_id=user_id)
         query &= Q(user=user)
 
     if status is not None:
-        query &= Q(status=Rental.Status[status])
+        query &= Q(status=status)
 
     return Rental.objects.filter(query)
 
@@ -30,4 +32,4 @@ def rental_get_current_by_user(user_id: int) -> Rental | None:
     except Rental.DoesNotExist:
         return None
     except Rental.MultipleObjectsReturned:
-        raise APIException(f"User has multiple rentals active")
+        raise APIException("User has multiple rentals active")

@@ -11,9 +11,10 @@ class RentalQueryParamsSerializer(serializers.Serializer):
     status = serializers.CharField(required=False)
 
     def validate_status(self, value: str):
-        if value.upper() not in Rental.Status.names:
-            raise serializers.ValidationError("Invalid status")
-        return value.upper()
+        status = Rental.Status
+        if value not in status.values:
+            raise serializers.ValidationError("Invalid status value.")
+        return value
 
 class RentalFinishSerializer(serializers.Serializer):
     lon = serializers.FloatField()
@@ -23,8 +24,9 @@ class RentalUpdateSerializer(serializers.Serializer):
     status = serializers.CharField(required=False)
     started_at = serializers.DateTimeField(required=False)
     finished_at = serializers.DateTimeField(required=False)
-
     def validate_status(self, value: str):
-        if value.upper() not in Rental.Status.values:
-            raise serializers.ValidationError("Invalid status")
-        return value.upper()
+        status = Rental.Status
+        if value not in status.values:
+            raise serializers.ValidationError("Invalid status value.")
+        return value
+    

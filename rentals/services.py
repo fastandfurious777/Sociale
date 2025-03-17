@@ -13,7 +13,7 @@ from parkings.selectors import check_parking_location
 def rental_start(user_id: int, bike_id: int):
     user = user_get(user_id=user_id)
     bike = bike_get(bike_id=bike_id)
-
+ 
     rental = Rental(
         user=user,
         bike=bike,
@@ -52,6 +52,8 @@ def rental_update(rental_id: int, data):
             setattr(rental, record, data[record])
         else:
             raise ValidationError(detail={'detail': f"Field '{record}' doesn't exist in 'bike'"})
+    rental.full_clean()
+    rental.save()
 
 def rental_delete(rental_id: int):
     rental = rental_get(rental_id=rental_id)

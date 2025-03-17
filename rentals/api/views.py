@@ -17,9 +17,9 @@ class RentalListAPI(AdminPermissionMixin, APIView):
     query_serializer = RentalQueryParamsSerializer
 
     def get(self, request):
-        params = self.query_serializer(request.query_params)
+        params = self.query_serializer(data=request.query_params)
         params.is_valid(raise_exception=True)
-        rentals = rental_list(**params.validated_data)
+        rentals = rental_list(params=params.validated_data)
         serializer = self.serializer_class(rentals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -38,21 +38,21 @@ class RentalStartAPI(EligiblePermissionMixin ,APIView):
         bike = serializers.IntegerField()
 
     def post(self, request):
-        serializer = self.InputSerializer(request.data)
+        serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         bike_id = serializer.validated_data['bike']
         user_id = request.user.id
 
         rental_start(user_id=user_id, bike_id=bike_id)
-
+        
         return Response(status=status.HTTP_200_OK)
 
 class RentalFinishAPI(EligiblePermissionMixin, APIView):
     serializer_class = RentalFinishSerializer
 
     def post(self, request):
-        serializer = self.serializer_class(request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         user_id = request.user.id
@@ -66,7 +66,7 @@ class RentalUpdateAPI(APIView):
     serializer_class = RentalUpdateSerializer
 
     def put(self, request, rental_id):
-        serializer = self.serializer_class(request.data)
+        serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         rental_update(rental_id=rental_id, data=serializer.validated_data)

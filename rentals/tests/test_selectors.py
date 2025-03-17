@@ -5,9 +5,9 @@ from django.utils import timezone
 
 from rentals.models import Rental
 from rentals.selectors import rental_list, rental_get, rental_get_current_by_user
+from rentals.tests.factories import TestRentalFactory
 from users.tests.factories import TestUserFactory
 from bikes.tests.factories import TestBikeFactory
-
 
 
 class TestRentalSelectors(TestCase):
@@ -19,13 +19,21 @@ class TestRentalSelectors(TestCase):
         cls.bike1 = TestBikeFactory.create()
         cls.bike2 = TestBikeFactory.create()
 
-        # TODO implement factories for Rental
-        cls.rental1 = Rental.objects.create(user=cls.user1, bike=cls.bike1, status=Rental.Status.STARTED, started_at=timezone.now())
-        cls.rental2 = Rental.objects.create(user=cls.user1, bike=cls.bike2, status=Rental.Status.FINISHED,  started_at=timezone.now())
-        cls.rental3 = Rental.objects.create(user=cls.user2, bike=cls.bike2, status=Rental.Status.STARTED,  started_at=timezone.now())
+        cls.rental1 = TestRentalFactory.create(
+            user=cls.user1, bike=cls.bike1,
+            status=Rental.Status.STARTED
+        )
+        cls.rental2 = TestRentalFactory.create(
+            user=cls.user1, bike=cls.bike2,
+            status=Rental.Status.FINISHED
+        )
+        cls.rental3 = TestRentalFactory.create(
+            user=cls.user2, bike=cls.bike2,
+            status=Rental.Status.STARTED
+        )
 
     def test_rental_list(self):
-        rentals = rental_list(user_id=self.user1.id, status="STARTED")
+        rentals = rental_list(user_id=self.user1.id, status="Started")
         self.assertEqual(rentals.count(), 1)
         self.assertEqual(rentals[0], self.rental1)
 
@@ -34,7 +42,7 @@ class TestRentalSelectors(TestCase):
         self.assertEqual(rentals.count(), 2)
 
     def test_rental_list_no_user(self):
-        rentals = rental_list(user_id=None, status="STARTED")
+        rentals = rental_list(user_id=None, status="Started")
         self.assertEqual(rentals.count(), 2)
 
     def test_rental_get(self):
@@ -50,6 +58,6 @@ class TestRentalSelectors(TestCase):
         self.assertEqual(rental, self.rental1)
 
     def test_rental_get_current_by_user_multiple_active(self):
-        Rental.objects.create(user=self.user1, bike=self.bike1, status=Rental.Status.STARTED, started_at=timezone.now())
+        TestRentalFactory.create(user=self.user1, status=Rental.Status.STARTED)
         with self.assertRaises(APIException):
             rental_get_current_by_user(self.user1.id)
