@@ -166,10 +166,7 @@ class VerifyEmailApi(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error("UID DECODING FAILED: %s", e, extra={"request": request})
-            return Response(
-                {"detail": "Something unexpected happened"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         user = user_get(user_id=user_id)
         if default_token_generator.check_token(user, data["token"]):
@@ -230,10 +227,7 @@ class ResetPasswordCheckApi(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error("UID DECODING FAILED: %s", e, extra={"request": request})
-            return Response(
-                {"detail": "Something unexpected happened"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
         user = user_get(user_id=user_id)
 

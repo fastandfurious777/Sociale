@@ -98,6 +98,7 @@ class UserApiTests(CustomAPITestCase):
         }
         response = self.client.post(url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn("Email already exists", str(response.data))
 
     def test_register_password_mismatch(self):
         url = reverse("users:register")

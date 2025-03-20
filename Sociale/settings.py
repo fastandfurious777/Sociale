@@ -150,3 +150,62 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+LOGLEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
+LOG_DIR = os.path.join(BASE_DIR, 'logs')
+if not os.path.exists(LOG_DIR):
+    os.makedirs(LOG_DIR)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'filters': {
+        'skip_options': {
+            '()': 'utils.logging.SkipOptionsRequestsFilter',
+        },
+    },
+    'formatters': {
+        'simple': {
+            'format': '{levelname} {asctime} {module} {message} ',
+            'style': '{',
+        },
+        'custom': {
+            'format': "{levelname} {asctime} {module} {request_ip} {request.method} {request.path} {message}  ",
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'debug.log'),
+            'formatter': 'simple',
+        },
+        'file_users': {
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'users.log'),
+            'formatter': 'custom',
+            'filters': ['skip_options'],
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': LOGLEVEL,
+            'propagate': False,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'users': {
+            'handlers': ['console', 'file_users'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

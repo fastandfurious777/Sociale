@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 from users.models import User
 
 
@@ -27,7 +26,6 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField(
         required=True,
         max_length=255,
-        validators=[UniqueValidator(queryset=User.objects.all())],
     )
     password = serializers.CharField(write_only=True, required=True)
     confirmed_password = serializers.CharField(write_only=True, required=True)
@@ -38,6 +36,11 @@ class RegisterSerializer(serializers.Serializer):
         data.pop("confirmed_password")
         return data
 
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
+
 
 class UpdateSerializer(serializers.Serializer):
     email = serializers.EmailField(required=False)
@@ -46,6 +49,11 @@ class UpdateSerializer(serializers.Serializer):
     is_verified = serializers.BooleanField(required=False)
     is_active = serializers.BooleanField(required=False)
     is_staff = serializers.BooleanField(required=False)
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("Email already exists")
+        return value
 
 
 class ResetPasswordRequestSerializer(serializers.Serializer):
