@@ -1,5 +1,6 @@
 from django.contrib.auth import login
 from django.contrib.auth.tokens import default_token_generator
+from django.http import Http404
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
@@ -38,8 +39,14 @@ class UserLoginApi(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+        try:
+            user = user_get_by_email(email=data["email"])
+        except Http404:
+            logger.error("USER NOT FOUND: %s", data["email"], extra={"request": request})
+            return Response(
+                {"detail": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST
+            )
 
-        user = user_get_by_email(email=data["email"])
         if not user.check_password(data["password"]):
             logger.warning(
                 "INVALID CREDENTIALS: %s", user.email, extra={"request": request}

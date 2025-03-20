@@ -1,32 +1,28 @@
 from django.test import TestCase
-from users.models import User
 from django.utils import timezone
+from users.tests.factories import TestUserFactory
+
 
 class UserModelTests(TestCase):
-    def setUp(self):
-        self.user = User(
-            email="user@test.com",
-            password="pwd",
-            is_active=True,
-            is_verified=False
-        )
-        
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = TestUserFactory.create()
 
     def test_deactivate(self):
         self.user.deactivate()
-        self.assertFalse(self.user.is_active, "user should be deactivated")
+        self.assertFalse(self.user.is_active)
 
     def test_is_eligible(self):
-        self.assertFalse(self.user.is_eligible, "user should not be eligible when not verified")
+        self.assertFalse(self.user.is_eligible)
         self.user.is_verified = True
-        self.assertTrue(self.user.is_eligible, "user should be eligible when active and verified")
+        self.assertTrue(self.user.is_eligible)
 
     def test_verify(self):
         self.assertFalse(self.user.is_verified)
-        self.assertIsNone(self.user.verified_at, "verified_at should be None")
+        self.assertIsNone(self.user.verified_at)
         self.user.verify()
         self.assertTrue(self.user.is_verified)
         self.assertAlmostEqual(
-            self.user.verified_at, timezone.now(), delta=timezone.timedelta(seconds=1),
-            msg="verified_at should be close to the current time"
+            self.user.verified_at, timezone.now(), delta=timezone.timedelta(seconds=1)
         )
