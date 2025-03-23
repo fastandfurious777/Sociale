@@ -1,9 +1,31 @@
-# API Reference Documentation
+## API Reference Documentation
 
-## Overview
+<h2 id="overview">Overview</h2>
 This document provides a comprehensive guide to the API endpoints available in the app. It covers endpoints in users, bikes, parkings, and rentals including methods, query parameters and response formats.
 
-## Authentication
+- [Overview](#overview)
+- [Authentication](#authentication)
+- [User Endpoints](#user-endpoints)
+  - [Register User](#register-user)
+  - [Verify Email](#verify-email)
+  - [Reset Password Request](#reset-password-request)
+  - [Reset Password](#reset-password)
+- [User Management Endpoints](#user-management-endpoints)
+  - [List Users](#list-users)
+  - [User Detail](#user-detail)
+  - [User Create](#user-create)
+  - [Update User](#update-user)
+  - [Delete User](#delete-user)
+- [Bike Endpoints](#bike-endpoints)
+  - [List Bikes](#list-bikes)
+  - [Bike Detail](#bike-detail)
+  - [Create Bike](#create-bike)
+  - [Update Bike](#update-bike)
+  - [Delete Bike](#delete-bike)
+
+
+<h2 id="authentication">Authentication</h2>
+
 **Endpoint:** `POST /users/login`
 
 **Description:**  
@@ -51,9 +73,9 @@ The user's `is_active` status is set to `FALSE` in the database, preventing new 
 Fix:
 Admin must manually activate the account by setting `is_active = TRUE` in the user management system.
 
-## User Endpoints
+<h2 id="user-endpoints">User Endpoints</h2>
 
-### 1. Register User
+<h3 id="register-user">1. Register User</h3>
 
 **Endpoint:** `POST /users/register/`
 
@@ -97,7 +119,7 @@ The server sends a mail with verification link formatted as `FRONTEND_URL/UID/TO
 
 ---
 
-### 2. Verify Email
+<h3 id="verify-email">2. Verify Email</h3>
 
 **Endpoint:** `POST /users/verify-email/`
 
@@ -126,7 +148,7 @@ Verifies user's email address using the provided token.
 
 ---
 
-### 3. Reset Password Request
+<h3 id="reset-password-request">3. Reset Password Request</h3>
 
 **Endpoint:** `POST /users/reset-password-request/`
 
@@ -160,7 +182,7 @@ Sends a password reset link to the user's email.
 
 ---
 
-### 4. Reset Password
+<h3 id="reset-password">4. Reset Password</h3>
 
 **Endpoint:** `PUT /users/reset-password-check/`
 
@@ -317,3 +339,165 @@ Delete a user account.
 ---
 
 ## Bike Endpoints
+
+These endpoints allow you to manage bikes in the system. Note that endpoints for getting , creating, editing and deleting a specific bike are restricted for admins only. Non-admin users attempting to access admin-only endpoints will receive a `403 Forbidden` response.
+
+---
+
+### 1. List Bikes
+
+**Endpoint:** `GET /bikes/`
+
+**Description:**  
+Lists bikes available for rental. Only users with <u>eligible accounts</u> (i.e. those with verified emails and activated by an admin) or admin users can access this endpoint.
+
+- **Default Behavior:**  
+  Only bikes that are available (not currently rented or hidden by admins) are included in the response.
+  
+- **Admin Feature:**  
+  Admin users can include bikes that are not available with the query parameter `include_unavailable=true`
+  
+- **Access Restriction:**  
+  Eligible users (non-admin) are not permitted to view unavailable bikes. If an eligible user attempts to use the `include_unavailable=True`, a `403 Forbidden` error is returned.
+
+
+**Query Parameters:**
+
+- **include_unavailable** (optional, boolean):  already discussed before
+
+**Response:**
+
+**200 OK**  *Retrieve a list of bikes*  
+  ```json
+  [
+    {
+      "name": "Moongoose",
+      "lon": 19.941945,
+      "lat": 50.060453
+    },
+    {
+      "name": "Mountain Explorer",
+      "lon": 19.946589,
+      "lat": 50.051214
+    }
+  ]
+  ```
+
+**403 Forbidden**  *When a non-admin user attempts to include unavailable bikes*  
+  ```json
+  {
+    "detail": "Forbidden: You cannot include unavailable bikes"
+  }
+  ```
+
+---
+
+### 2. Bike Detail
+
+**Endpoint:** `GET /bikes/<bike_id>/`
+
+**Description:**  
+Retrieve detailed information for a specific bike by its ID. *(Admin only)*
+
+**Response:**
+
+**200 OK**  *Bike was successfully retrieved*  
+  ```json
+  {
+    "name": "Moongoose",
+    "lon": 19.941945,
+    "lat": 50.060453,
+    "qr_code": "30ebf6b5-4848-4e90-88ad-f80f59083508",
+    "is_available": true,
+    "last_taken_by": 5,
+    "last_updated": "2023-03-23T12:00:00Z"
+  }
+  ```
+
+**404 Not Found**  *Bike with provided ID does not exist*  
+
+---
+
+### 3. Create Bike
+
+**Endpoint:** `POST /bikes/create/`
+
+**Description:**  
+Create a new bike entry. *(Admin only)*
+
+**Request:**
+```json
+{
+  "name": "Moongoose",
+  "lon": 19.941945,
+  "lat": 50.060453,
+  "code": 123456,
+  "is_available": true,
+  "last_taken_by": null
+}
+```
+
+**Response:**
+
+**201 Created**  *Bike was successfully created*  
+
+**400 Bad Request** *Provided data is invalid*  
+  ```json
+  {
+    "field_name": ["error description"]
+  }
+  ```
+
+---
+
+### 4. Update Bike
+
+**Endpoint:** `PUT /bikes/<bike_id>/update/`
+
+**Description:**  
+Update details for an existing bike. Only the fields provided in the request will be updated. *(Admin only)*
+
+**Request Example:**
+```json
+{
+  "name": "Updated Moongoose",
+  "is_available": false
+}
+```
+
+**Response:**
+
+**200 OK**  *Bike was updated successfully*  
+
+**400 Bad Request**  *Provided data is invalid*
+  ```json
+  {
+    "field_name": ["error description"]
+  }
+  ```
+
+**404 Not Found**  *Bike with the provided ID does not exist*  
+  ```json
+  {
+    "detail": "Not found."
+  }
+  ```
+
+---
+
+### 5. Delete Bike
+
+**Endpoint:** `DELETE /bikes/<bike_id>/delete/`
+
+**Description:**  
+Delete a bike from the system. *(Admin only)*
+
+
+**Response:**
+
+**200 OK**  *Bike was deleted successfully*  
+
+
+**404 Not Found**  *Bike with the provided ID does not exist*  
+
+---

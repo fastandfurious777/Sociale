@@ -1,36 +1,40 @@
+import uuid
 from django.db import models
-from parkings.models import Parking
 from rest_framework.exceptions import ValidationError
-from shapely import Point
+
+from parkings.selectors import check_parking_location
 from users.models import User
-import uuid 
+
 
 class Bike(models.Model):
     name = models.CharField(max_length=100)
     lon = models.FloatField()
     lat = models.FloatField()
-    code = models.IntegerField(max_length=10)
-    qr_code = models.UUIDField(
-        default = uuid.uuid4,
-        editable = False
-        ) 
+    code = models.IntegerField()
+    qr_code = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     is_available = models.BooleanField()
-    last_taken_by = models.ForeignKey(User, on_delete=models.PROTECT, null=True, blank=True)
+    last_taken_by = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True
+    )
     last_updated = models.DateTimeField(auto_now=True)
-  
-    def rent(self, user: User):
+
+    def start_rent(self, user):
         if not self.is_available:
-            raise ValidationError(detail={"detail": "Bike is already rented"})
+            raise ValidationError({"detail": "Bike is not available"})
         self.is_available = False
         self.last_taken_by = user
+        self.validate_location()
+        self.full_clean()
+        self.save()
 
-    def return_bike(self, lon: float, lat: float):
+    def finish_rent(self, lon, lat):
         self.is_available = True
         self.lon = lon
         self.lat = lat
+        self.validate_location()
+        self.full_clean()
+        self.save()
 
-    def clean(self) -> None:
-        boundary = Parking.objects.filter(name="boundary").first()
-        point = Point(self.lon, self.lat)
-        if boundary is not None and not point.within(other=boundary.get_polygon_from_area()):
-            raise ValidationError(detail={"detail": "Bike cannot be parked outside boundary"})
+    def validate_location(self):
+        if not check_parking_location(lon=self.lon, lat=self.lat):
+            raise ValidationError({"detail": "Bike is not in a parking location"})
