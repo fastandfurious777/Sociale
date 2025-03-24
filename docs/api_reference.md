@@ -22,6 +22,12 @@ This document provides a comprehensive guide to the API endpoints available in t
   - [Create Bike](#create-bike)
   - [Update Bike](#update-bike)
   - [Delete Bike](#delete-bike)
+- [Parking Endpoints](#parking-endpoints)
+  - [List Parkings](#list-parkings)
+  - [Parking Detail](#parking-detail)
+  - [Create Parking](#create-parking)
+  - [Update Parking](#update-parking)
+  - [Delete Parking](#delete-parking)
 
 
 <h2 id="authentication">Authentication</h2>
@@ -455,7 +461,7 @@ Create a new bike entry. *(Admin only)*
 **Endpoint:** `PUT /bikes/<bike_id>/update/`
 
 **Description:**  
-Update details for an existing bike. Only the fields provided in the request will be updated. *(Admin only)*
+Updates a specific bike. Only the fields provided in the request will be updated. *(Admin only)*
 
 **Request Example:**
 ```json
@@ -477,11 +483,6 @@ Update details for an existing bike. Only the fields provided in the request wil
   ```
 
 **404 Not Found**  *Bike with the provided ID does not exist*  
-  ```json
-  {
-    "detail": "Not found."
-  }
-  ```
 
 ---
 
@@ -501,3 +502,154 @@ Delete a bike from the system. *(Admin only)*
 **404 Not Found**  *Bike with the provided ID does not exist*  
 
 ---
+
+<h2 id="parkings">Parkings Endpoints </h2>
+Rental area can cover an entire country or even globe, but it is recommended to limit it to smaller regions, such as city. To enforce this, admins can define a special parking area called a "boundary".
+
+This can be done by sending a <a href="create-parking">POST request</a> with the following data (coordinates should be adjusted to match your specific location):
+ 
+  ```json
+  {
+  "name": "boundary",
+  "geometry": { 
+    "type": "Polygon", 
+    "coordinates": [
+      [
+        [19.850, 50.100], 
+        [19.950, 50.100], 
+        [20.050, 50.050], 
+        [19.950, 49.950], 
+        [19.850, 49.950], 
+        [19.850, 50.100]
+      ]
+    ] 
+  }
+  }
+  ```
+
+The geometry attribute follows the GEOJSON format, so make sure to familiarize yourself with GEOJSON documentation:
+
+* https://geojson.org/geojson-spec.html
+* https://www.ibm.com/docs/en/db2/11.5?topic=formats-geojson-format
+  
+<h3 id="list-parkings">List Parkings</h3>
+
+
+**Endpoint:**  `GET /parkings/`
+
+**Description:**  
+Retrieve a list of all parkings.
+- **Default Behavior:** Only active parkings are returned by default.
+- **Admin Feature:** Admin users can include inactive parkings by appending the query parameter `include_inactive=true`.
+- **Access Restriction:** Non-admin (eligible) users are not allowed to use `include_inactive`. If attempted, a `403 Forbidden` error is returned.
+
+**Query Parameters:**  
+- `include_inactive` (optional, boolean): When set to `true` by an admin, both active and inactive parkings are included.
+
+**Responses:**
+
+**200 OK** *Retrieve a list of parkings*
+  ```json
+  [
+    {
+      "name": "Central Parking",
+      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+      "capacity": 150
+    },
+    {
+      "name": "Bronx Parking",
+      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.946589, 50.051214 ], [ ... ] ] ] },
+      "capacity": 100
+    },
+    ...
+  ]
+```
+
+
+<h3 id="parking-detail">Parking Detail</h3>
+
+**Endpoint:**  `GET /parkings/<parking_id>/`
+
+**Description:**  
+Retrieve detailed information for a specific parking by its ID.  *(Admin only)*
+
+**Responses:**
+
+**200 OK** *Retrieve parking by ID*
+  ```json
+  {
+    "name": "Central Parking",
+    "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+    "capacity": 150
+  }
+  ```
+
+**404 Not Found** *Parking ID does not exist*
+
+<h3 id="create-parking">Create Parking</h3>
+
+**Endpoint:**  `POST /parkings/`
+
+**Description:**  
+Create a new parking with provided details. *(Admin only)*
+
+**Request Body:**
+```json
+{
+  "name": "New Parking Lot",
+  "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+  "capacity": 200
+}
+```
+
+**Responses:**
+
+**201 Created** *Parking created successfully*
+
+**400 Bad Request**  *Provided data is invalid*
+  ```json
+  {
+    "capacity": "Capacity must be greater than zero"
+  }
+  ```
+
+<h3 id="update-parking">Update Parking</h3>
+
+**Endpoint:**  `PUT /parkings/<parking_id>/`
+
+**Description:**  
+Update parking by ID. *(Admin only)*
+
+**Request Body:**
+```json
+{
+  "name": "Updated Parking Name",
+  "capacity": 180
+}
+```
+
+**Responses:**
+
+**200 OK** *Parking updated successfully*
+
+**400 Bad Request**  *Provided data is invalid*
+  ```json
+  {
+    "capacity": "Capacity must be greater than zero"
+  }
+  ```
+
+**404 Not Found** *Parking with given ID does not exist*
+
+<h3 id="delete-parking">Delete Parking</h3>
+
+**Endpoint:**  `DELETE /parkings/<parking_id>/`
+
+**Description:**  
+Delete an existing parking entry by its ID. *(Admin only)*
+
+**Responses:**
+
+**204 No Content** *Parking deleted successfully*
+
+**404 Not Found** *Parking with given ID does not exist*
