@@ -7,8 +7,7 @@ from rentals.selectors import rental_get_current_by_user
 from rentals.tests.factories import TestRentalFactory
 from users.tests.factories import TestUserFactory
 from bikes.tests.factories import TestBikeFactory
-from parkings.models import Parking
-
+from parkings.tests.factories import TestParkingFactory
 
 
 class TestRentalSelectors(TestCase):
@@ -19,13 +18,9 @@ class TestRentalSelectors(TestCase):
         cls.bike1 = TestBikeFactory.create(is_available=True)
         cls.bike2 = TestBikeFactory.create(is_available=True)
 
-        Parking.objects.create(
-            name="boundary",
-            area={
-            "type": "Polygon", 
-            "coordinates":[[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]]
-            }
-        ) 
+        TestParkingFactory.create(
+            name="boundary", coords=[[0, 0], [0, 10], [10, 10], [10, 0], [0, 0]]
+        )
 
     def test_rental_start(self):
         rental_start(user_id=self.user.id, bike_id=self.bike1.id)
@@ -42,8 +37,8 @@ class TestRentalSelectors(TestCase):
         with self.assertRaises(APIException) as cm:
             diffrent_user = TestUserFactory.create()
             rental_start(user_id=diffrent_user.id, bike_id=self.bike1.id)
-        self.assertIn("Bike is already rented", str(cm.exception))
-    
+        self.assertIn("Bike is not available", str(cm.exception))
+
     def test_rental_finish(self):
         rental_start(user_id=self.user.id, bike_id=self.bike1.id)
         rental = rental_get_current_by_user(user_id=self.user.id)
@@ -56,12 +51,12 @@ class TestRentalSelectors(TestCase):
         rental_start(user_id=self.user.id, bike_id=self.bike1.id)
         with self.assertRaises(APIException) as cm:
             rental_finish(user_id=self.user.id, lon=11, lat=11)
-        self.assertIn("You are not in the parking area", str(cm.exception))
-    
+        self.assertIn("Bike is not in a parking location", str(cm.exception))
+
     def test_rental_update(self):
         rental = TestRentalFactory.create(status=Rental.Status.STARTED)
-        new_status = 'Finished'
-        rental_update(rental_id=rental.id, data={'status': new_status})
+        new_status = "finished"
+        rental_update(rental_id=rental.id, data={"status": new_status})
         rental.refresh_from_db()
         self.assertEqual(rental.status, Rental.Status.FINISHED.value)
 

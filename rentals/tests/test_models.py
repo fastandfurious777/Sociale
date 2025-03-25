@@ -7,6 +7,7 @@ from users.tests.factories import TestUserFactory
 from bikes.tests.factories import TestBikeFactory
 
 class RentalTests(TestCase):
+    
     @classmethod
     def setUpTestData(cls):
         cls.user = TestUserFactory.create()

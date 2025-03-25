@@ -1,11 +1,12 @@
-from rest_framework.exceptions import APIException
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django.http import Http404
+from rest_framework.exceptions import APIException
 
 from rentals.models import Rental
 from users.selectors import user_get
 
-def rental_list(params: dict = {}) -> list[Rental]:
+
+def rental_list(params: dict) -> QuerySet[Rental]:
     user_id = params.get("user_id")
     status = params.get("status")
     query = Q()
@@ -18,11 +19,13 @@ def rental_list(params: dict = {}) -> list[Rental]:
 
     return Rental.objects.filter(query)
 
+
 def rental_get(rental_id: int):
     try:
         return Rental.objects.get(id=rental_id)
     except Rental.DoesNotExist:
-        raise Http404("Rental not found")
+        raise Http404
+
 
 def rental_get_current_by_user(user_id: int) -> Rental | None:
     user = user_get(user_id=user_id)

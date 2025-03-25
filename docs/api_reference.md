@@ -3,31 +3,19 @@
 <h2 id="overview">Overview</h2>
 This document provides a comprehensive guide to the API endpoints available in the app. It covers endpoints in users, bikes, parkings, and rentals including methods, query parameters and response formats.
 
-- [Overview](#overview)
-- [Authentication](#authentication)
-- [User Endpoints](#user-endpoints)
-  - [Register User](#register-user)
-  - [Verify Email](#verify-email)
-  - [Reset Password Request](#reset-password-request)
-  - [Reset Password](#reset-password)
+- [API Reference Documentation](#api-reference-documentation)
 - [User Management Endpoints](#user-management-endpoints)
-  - [List Users](#list-users)
-  - [User Detail](#user-detail)
-  - [User Create](#user-create)
-  - [Update User](#update-user)
-  - [Delete User](#delete-user)
+  - [1. List Users](#1-list-users)
+  - [2. User Detail](#2-user-detail)
+  - [3. User Create](#3-user-create)
+  - [4. Update User](#4-update-user)
+  - [5. Delete User](#5-delete-user)
 - [Bike Endpoints](#bike-endpoints)
-  - [List Bikes](#list-bikes)
-  - [Bike Detail](#bike-detail)
-  - [Create Bike](#create-bike)
-  - [Update Bike](#update-bike)
-  - [Delete Bike](#delete-bike)
-- [Parking Endpoints](#parking-endpoints)
-  - [List Parkings](#list-parkings)
-  - [Parking Detail](#parking-detail)
-  - [Create Parking](#create-parking)
-  - [Update Parking](#update-parking)
-  - [Delete Parking](#delete-parking)
+  - [1. List Bikes](#1-list-bikes)
+  - [2. Bike Detail](#2-bike-detail)
+  - [3. Create Bike](#3-create-bike)
+  - [4. Update Bike](#4-update-bike)
+  - [5. Delete Bike](#5-delete-bike)
 
 
 <h2 id="authentication">Authentication</h2>
@@ -653,3 +641,159 @@ Delete an existing parking entry by its ID. *(Admin only)*
 **204 No Content** *Parking deleted successfully*
 
 **404 Not Found** *Parking with given ID does not exist*
+
+<h2 id="rentals">Rental Endpoints </h2>
+
+<h3 id="rental-list">Rental List</h3>
+
+**Endpoint:** `GET /rentals/`
+
+**Description:**  
+Retrieve a list of rental records. *( Admin only )*
+
+**Query Parameters:**  
+- **user_id** (optional, integer): Filter rentals by the ID of the u .
+- **status** (optional, string): Filter rentals by their status (`"started"`, `"finished"`, `"canceled"`).  
+
+**Response:**
+
+`200 OK` *Retrieve a list of rentals*
+```json
+[
+  {
+    "id": 1,
+    "user": 3,
+    "bike": 5,
+    "status": "started",
+    "started_at": "2023-03-23T12:00:00Z",
+    "finished_at": null,
+  },
+  {
+    "id": 2,
+    "user": 4,
+    "bike": 8,
+    "status": "finished",
+    "started_at": "2023-03-22T11:00:00Z",
+    "finished_at": "2023-03-22T12:00:00Z",
+  }
+]
+```
+
+`400 Bad Request` *Invalid query parameters*
+
+`403 Forbidden` *Access forbidden*
+
+---
+
+<h3 id="rental-detail">Rental Detail</h3>
+
+**Endpoint:** `GET /rentals/<rental_id>/`
+
+**Description:**  
+Retrieve a specific rental record by its ID. *( Admin only)*
+
+**Response:**
+
+`200 OK` *Rental details retrieved successfully*
+```json
+{
+  "id": 1,
+  "user": 3,
+  "bike": 5,
+  "status": "started",
+  "started_at": "2023-03-23T12:00:00Z",
+  "finished_at": null,
+}
+```
+
+`404 Not Found` *Rental with the provided ID does not exist*
+
+---
+
+<h3 id="rental-start">Rental Start</h3>
+
+**Endpoint:** `POST /rentals/start/`
+
+**Description:**  
+Start a new rental by user. A code for bike locker is returned on success. Endpoint is restricted for elibible and admin users.
+
+**Request Body:**
+
+```json
+{
+  "bike": 5
+}
+```
+**Response:**
+
+`201 Created` *Rental was started successfully*
+```json
+{
+  "code": 5132 
+}
+```
+
+`400 Bad Request` *Invalid request data (e.g., bike already rented, user has an ongoing rental)*
+```json
+{
+  "detail": "Bike is not available"
+}
+```
+---
+
+<h3 href="rentals-finish">Finish Rental </h3>
+
+
+**Endpoint:**  `POST /rentals/finish/`
+
+**Description:**  
+Finishes a rental, similarly to `rental/start` user has to be verified and active in order to access this endpoint.
+
+**Request Body:**  
+```json
+{
+  "lon": 34.0522,
+  "lat": -118.2437
+}
+```
+**Response:**
+
+`200 OK` *Rental finished successfully*
+
+`400 Bad Request` *Invalid request data (e.g. user is not in parking location)*
+
+```json
+{
+  "detail": "Bike is not in a parking location"
+}
+```
+
+---
+
+<h3 href="rentals-update">Update Rental </h3>
+
+**Endpoint:**  `PUT /rentals/{rental_id}/update/`
+
+**Description:**  
+Allows updating rental details such as `status`, `started_at`, `finished_at` *( Admin Only )*
+
+**Request Body:**  
+```json
+{
+  "status": "finished",
+  "finished_at": "2025-03-24T16:00:00Z"
+}
+```
+
+**Response:**
+
+`200 OK` *Rental updated successfully*
+
+
+`400 Bad Request` *Invalid request data*
+```json
+{
+  "status": "Invalid status value"
+}
+```
+`404 Not Found` *Rental wasn't found*
