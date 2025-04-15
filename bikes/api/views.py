@@ -2,15 +2,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
-from .serializers import (
+from bikes.api.serializers import (
     BikeSerializer,
     BikeDetailSerializer,
     BikeCreateSerializer,
-    BikeUpdateSerializer
-    )
-from utils.permissions import AdminPermissionMixin, EligiblePermissionMixin
+    BikeUpdateSerializer,
+)
 from bikes.selectors import bike_list, bike_get
 from bikes.services import bike_create, bike_update, bike_delete
+from utils.permissions import AdminPermissionMixin, EligiblePermissionMixin
 
 
 class BikeListAPI(EligiblePermissionMixin, APIView):
@@ -20,19 +20,20 @@ class BikeListAPI(EligiblePermissionMixin, APIView):
         user = request.user
         include_unavailable = request.query_params.get("include_unavailable", False)
 
+        if not user.is_staff and include_unavailable:
+            return Response(
+                {"detail": "Forbidden: You cannot include unavailable bikes"},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
         if user.is_staff and include_unavailable:
             bikes = bike_list(include_unavailable=True)
-        elif not user.is_staff and include_unavailable:
-            return Response( 
-                {"detail": "Forbidden: You cannot include unavailable bikes"},
-                status=status.HTTP_403_FORBIDDEN
-            )
         else:
             bikes = bike_list()
 
         serializer = self.serializer_class(bikes, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class BikeDetailAPI(AdminPermissionMixin, APIView):
     serializer_class = BikeDetailSerializer

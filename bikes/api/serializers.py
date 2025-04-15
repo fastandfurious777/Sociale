@@ -1,20 +1,32 @@
 from rest_framework import serializers
 from bikes.models import Bike
 
+
 class BikeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bike
-        fields = ['name', 'lon', 'lat']
+        fields = ["name", "lon", "lat"]
+
 
 class BikeDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bike
-        fields = ['name', 'lon', 'lat', 'qr_code', 'is_available', 'last_taken_by', 'last_updated']
+        fields = [
+            "name",
+            "lon",
+            "lat",
+            "qr_code",
+            "is_available",
+            "last_taken_by",
+            "last_updated",
+        ]
+
 
 class BikeCreateSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = Bike
-            fields = ['name', 'lon', 'lat', 'code', 'is_available', 'last_taken_by']
+    class Meta:
+        model = Bike
+        fields = ["name", "lon", "lat", "code", "is_available", "last_taken_by"]
+
 
 class BikeUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, max_length=100)

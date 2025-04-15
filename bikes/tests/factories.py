@@ -1,5 +1,4 @@
 import factory
-import uuid
 from random import uniform, randint
 
 from bikes.models import Bike
@@ -14,6 +13,5 @@ class TestBikeFactory(factory.django.DjangoModelFactory):
     lon = factory.LazyFunction(lambda: uniform(0, 3))
     lat = factory.LazyFunction(lambda: uniform(0, 3))
     code = factory.LazyFunction(lambda: randint(1000,9999))
-    qr_code = factory.LazyFunction(uuid.uuid4)
     is_available = factory.Faker('boolean')
     last_taken_by = factory.SubFactory(TestUserFactory)

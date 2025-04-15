@@ -17,4 +17,4 @@ class TestRentalFactory(factory.django.DjangoModelFactory):
     # LazyFunction requires a callable; using timezone.now() directly (as linters suggest) won't work
     started_at = factory.LazyFunction(lambda: timezone.now())
     finished_at = factory.LazyFunction(lambda: timezone.now() + timedelta(days=1))
-    status = factory.Faker('random_element', elements=['Started', 'Finished', 'Canceled'])
+    status = factory.Faker('random_element', elements=['started', 'finished', 'canceled'])

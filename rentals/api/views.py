@@ -11,6 +11,8 @@ from rentals.api.serializers import (
     RentalFinishSerializer,
     RentalUpdateSerializer,
 )
+from bikes.selectors import bike_get
+
 
 class RentalListAPI(AdminPermissionMixin, APIView):
     serializer_class = RentalSerializer
@@ -19,9 +21,11 @@ class RentalListAPI(AdminPermissionMixin, APIView):
     def get(self, request):
         params = self.query_serializer(data=request.query_params)
         params.is_valid(raise_exception=True)
+
         rentals = rental_list(params=params.validated_data)
         serializer = self.serializer_class(rentals, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class RentalDetailAPI(AdminPermissionMixin, APIView):
     serializer_class = RentalSerializer
@@ -33,7 +37,8 @@ class RentalDetailAPI(AdminPermissionMixin, APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-class RentalStartAPI(EligiblePermissionMixin ,APIView):
+
+class RentalStartAPI(EligiblePermissionMixin, APIView):
     class InputSerializer(serializers.Serializer):
         bike = serializers.IntegerField()
 
@@ -41,12 +46,15 @@ class RentalStartAPI(EligiblePermissionMixin ,APIView):
         serializer = self.InputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        bike_id = serializer.validated_data['bike']
+        bike_id = serializer.validated_data["bike"]
         user_id = request.user.id
 
         rental_start(user_id=user_id, bike_id=bike_id)
-        
-        return Response(status=status.HTTP_200_OK)
+
+        bike = bike_get(bike_id=bike_id)
+
+        return Response(data={"code": bike.code}, status=status.HTTP_200_OK)
+
 
 class RentalFinishAPI(EligiblePermissionMixin, APIView):
     serializer_class = RentalFinishSerializer
@@ -72,6 +80,7 @@ class RentalUpdateAPI(APIView):
         rental_update(rental_id=rental_id, data=serializer.validated_data)
 
         return Response(status=status.HTTP_200_OK)
+
 
 class RentalDeleteAPI(AdminPermissionMixin, APIView):
     def delete(self, request, rental_id):

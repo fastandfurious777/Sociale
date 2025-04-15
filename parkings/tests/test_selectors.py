@@ -1,32 +1,28 @@
 from django.test import TestCase
-from parkings.models import Parking
+from django.http import Http404
+from parkings.tests.factories import TestParkingFactory
 from parkings.selectors import (
-    parking_list, 
+    parking_list,
     parking_get,
     parking_get_by_name,
-    check_parking_location
+    check_parking_location,
 )
-from django.http import Http404
+
 
 class TestParkingSelectors(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        active_parking_area = {
-            "type": "Polygon", 
-            "coordinates": [[[0, 0], [0, 4], [4, 4], [4, 0], [0, 0]]]
-        }
-        inactive_parking_area = {
-            "type": "Polygon",
-            "coordinates": [[[5, 5], [10, 10], [0, 10], [5, 5]]]
-        }
-        
-        cls.active_parking = Parking.objects.create(
-            name="ActiveParking", area=active_parking_area, is_active=True
-        ) 
-        cls.inactive_parking = Parking.objects.create(
-            name="InactiveParking", area=inactive_parking_area, is_active=False
-        ) 
+
+        cls.active_parking = TestParkingFactory.create(
+            name="ActiveParking", coords=[[[0, 0], [0, 4], [4, 4], [4, 0], [0, 0]]]
+        )
+
+        cls.inactive_parking = TestParkingFactory.create(
+            name="InactiveParking",
+            coords=[[[5, 5], [10, 10], [0, 10], [5, 5]]],
+            is_active=False,
+        )
 
     def test_parking_list(self):
         parkings = parking_list(include_inactive=True)
@@ -35,7 +31,7 @@ class TestParkingSelectors(TestCase):
     def test_parking_list_active(self):
         parkings = parking_list()
         self.assertEqual(parkings.count(), 1)
-        self.assertEqual(parkings[0].name, "ActiveParking")
+        self.assertIn(self.active_parking, parkings)
 
     def test_parking_get(self):
         parking = parking_get(2)
@@ -43,7 +39,7 @@ class TestParkingSelectors(TestCase):
 
     def test_parking_get_nonexistent(self):
         with self.assertRaises(Http404):
-            parking_get(999) 
+            parking_get(999)
 
     def test_parking_get_by_name(self):
         parking = parking_get_by_name("ActiveParking")
