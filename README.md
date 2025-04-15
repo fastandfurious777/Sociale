@@ -1,4 +1,5 @@
-<h3 align="center">Sociale</h3>
+<img  src=".github/assets/sociale-backend.png">
+<h3  id="readme-top" align="center">Sociale</h3>
 <p align="center">
     Seamless real-time bike rental management
     <br />
@@ -21,52 +22,45 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
-* python
-  ```sh
-  python3 --version
-  ```
+Make sure Docker is installed. You can download it from [here](https://www.docker.com/get-started).
+```sh
+docker --version
+```
 
 ### Installation
 
-```bash
-python3 -m venv <virtual-environment-name>
-# eg. python3 -m venv env
+1. **Clone the repository**  
+   First, clone the repository:
+   ```bash
+   git clone https://github.com/antonipokrzywa/sociale
+   cd https://github.com/antonipokrzywa/sociale
 
-# Activate virtual environment
-source <virtual-environment-name>/bin/activate
-# eg. source env/bin/activate
+2. **Set up environment variables**  
+   Ensure the `.env` file is present and properly configured with the correct database credentials, if you are planning to add password reset functionality make sure to include it too
 
-#Install dependencies
-pip install -r requirements.txt
+3. **Set up the Docker container**  
+   Build and start the Docker containers:
+   ```bash
+   docker compose up --build
+   ```
 
-TODO, adding some email configuration, adding some parkings etc
-```
+4. **Access the app**  
+   Once the containers are up, the app will be available at:
+   ```bash
+   http://localhost:8000
+   ```
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- USAGE EXAMPLES -->
-## Usage
+## Further steps
 
 TODO add some cool webap photos and provice link
 
 
 
-## Contributing
-
-Any contributions you make for this project are highly appreciated, especially when it comes to Cybersecurity
-
-If you are willing to contribute see CONTRIBUTE.md
-dac do contribute md:
-1. Create issue with a ???? tag - what type of tag
-2. Fork the Project
-3. Create Branch 
-4. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-5. Push to the Branch (`git push origin feature/AmazingFeature`)
-6. Open a Pull Request
-
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- LICENSE -->
+
 ## License
 
 Distributed under the MIT License. See `LICENSE.txt` for more information.

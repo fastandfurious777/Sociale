@@ -1,9 +1,13 @@
 ## API Reference Documentation
 
-<h2 id="overview">Overview</h2>
-This document provides a comprehensive guide to the API endpoints available in the app. It covers endpoints in users, bikes, parkings, and rentals including methods, query parameters and response formats.
+This document provides a comprehensive guide to the API endpoints available in the app. It covers endpoints for user, bikes, parkings, and rentals including methods, query parameters and response formats.
 
-- [API Reference Documentation](#api-reference-documentation)
+- [Authentication Endpoints](#authentication)
+  - [1. Login User](#login-user)
+  - [2. Register User](#register-user)
+  - [3. Verify Email](#verify-email)
+  - [4. Reset Password Request](#reset-password-request)
+  - [5. Reset Password](#reset-password)
 - [User Management Endpoints](#user-management-endpoints)
   - [1. List Users](#1-list-users)
   - [2. User Detail](#2-user-detail)
@@ -16,14 +20,29 @@ This document provides a comprehensive guide to the API endpoints available in t
   - [3. Create Bike](#3-create-bike)
   - [4. Update Bike](#4-update-bike)
   - [5. Delete Bike](#5-delete-bike)
+- [Parkings Endpoints](#parkings)
+  - [List Parkings](#list-parkings)
+  - [Parking Detail](#parking-detail)
+  - [Create Parking](#create-parking)
+  - [Update Parking](#update-parking)
+  - [Delete Parking](#delete-parking)
+- [Rental Endpoints](#rentals)
+  - [Rental List](#rental-list)
+  - [Rental Detail](#rental-detail)
+  - [Rental Start](#rental-start)
+  - [Rental Finish](#rental-finish)
+  - [Rental Update](#rental-update)
+
 
 
 <h2 id="authentication">Authentication</h2>
 
-**Endpoint:** `POST /users/login`
+<h3 id="login-user">Login User</h3>
+
+**Endpoint:** `POST /users/login/`
 
 **Description:**  
-Authenticate a user using their email and password. On a successful login, a server-side session is established and session cookie is set in the client’s browser
+Authenticate a user using his email and password. On a successful login, a server-side session is established and session cookie is set in the client’s browser
 
 > [!TIP]
 > Setting a `SESSION_COOKIE_SECURE=True` in `settings.py` will increase security even more
@@ -67,9 +86,8 @@ The user's `is_active` status is set to `FALSE` in the database, preventing new 
 Fix:
 Admin must manually activate the account by setting `is_active = TRUE` in the user management system.
 
-<h2 id="user-endpoints">User Endpoints</h2>
 
-<h3 id="register-user">1. Register User</h3>
+<h3 id="register-user">Register User</h3>
 
 **Endpoint:** `POST /users/register/`
 
@@ -205,10 +223,11 @@ Similarly to email verification link is structured as `FRONTEND_URL/UID/TOKEN` a
 
   `400 Bad Request` *If UID or Token are invalid*
 
----
+
 ## User Management Endpoints
 
-User Management system is only available for admins. In case a non privileged user ( with `is_staff=False` ) tries to fetch some data the access is denied and `403 Forbidden` status code is returned. In case you use django admin panel for management it might be a good idea to deactivate the endpoints below
+> [!NOTE]  
+> User Management system is only available for admins. In case a non privileged user ( with `is_staff=False` ) tries to fetch some data the access is denied and `403 Forbidden` status code is returned. In case you use django admin panel for management it might be a good idea to deactivate the endpoints below
 
 ### 1. List Users
 
@@ -330,13 +349,13 @@ Delete a user account.
 
 `404 Not Found`  *User with this ID does not exist*
 
----
+
 
 ## Bike Endpoints
 
-These endpoints allow you to manage bikes in the system. Note that endpoints for getting , creating, editing and deleting a specific bike are restricted for admins only. Non-admin users attempting to access admin-only endpoints will receive a `403 Forbidden` response.
+> [!NOTE]  
+> These endpoints allow you to manage bikes in the system. Note that endpoints for getting , creating, editing and deleting a specific bike are restricted for admins only. Non-admin users attempting to access admin-only endpoints will receive a `403 Forbidden` response.
 
----
 
 ### 1. List Bikes
 
@@ -489,12 +508,12 @@ Delete a bike from the system. *(Admin only)*
 
 **404 Not Found**  *Bike with the provided ID does not exist*  
 
----
+
 
 <h2 id="parkings">Parkings Endpoints </h2>
-Rental area can cover an entire country or even globe, but it is recommended to limit it to smaller regions, such as city. To enforce this, admins can define a special parking area called a "boundary".
 
-This can be done by sending a <a href="create-parking">POST request</a> with the following data (coordinates should be adjusted to match your specific location):
+> [!TIP]
+> Rental area can cover an entire country or even globe, but it is recommended to limit it to smaller regions, such as city. To enforce this, admins can define a special parking area called a "boundary". This can be done by sending a <a href="create-parking">POST request</a> with the following data (coordinates should be adjusted to match your specific location):
  
   ```json
   {
@@ -741,7 +760,7 @@ Start a new rental by user. A code for bike locker is returned on success. Endpo
 ```
 ---
 
-<h3 href="rentals-finish">Finish Rental </h3>
+<h3 id="rental-finish">Rental Finish</h3>
 
 
 **Endpoint:**  `POST /rentals/finish/`
@@ -770,7 +789,7 @@ Finishes a rental, similarly to `rental/start` user has to be verified and activ
 
 ---
 
-<h3 href="rentals-update">Update Rental </h3>
+<h3 id="rental-update">Rental Update</h3>
 
 **Endpoint:**  `PUT /rentals/{rental_id}/update/`
 
