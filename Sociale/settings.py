@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
-HOST = os.environ.get('HOST', default="http://localhost:8000/")
+HOST = os.environ.get('HOST', default="0.0.0.0")
 DEBUG = os.environ.get('DEBUG', '0').lower() in ('true', '1', 'yes')
 
 TEST_RUNNER = "redgreenunittest.django.runner.RedGreenDiscoverRunner"
@@ -35,12 +35,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(',')
 AUTH_USER_MODEL = 'users.User'
-FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'users.apps.UsersConfig',
     'parkings.apps.ParkingsConfig',
     'bikes.apps.BikesConfig',
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -65,7 +66,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+INSTALLED_APPS = [
+    'corsheaders'
+]
+CORS_ORIGIN_WHITELIST = [
+     os.environ.get("FRONTEND_URL", 'http://localhost:3000')
+]
 ROOT_URLCONF = 'Sociale.urls'
 
 TEMPLATES = [
@@ -100,7 +106,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-print(os.environ.get("POSTGRES_HOST"))
 DB_USERNAME = os.environ.get("POSTGRES_USER")
 DB_PASSWORD = os.environ.get("POSTGRES_PASSWORD")
 DB_DATABASE = os.environ.get("POSTGRES_DB")

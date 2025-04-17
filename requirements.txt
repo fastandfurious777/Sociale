@@ -1,0 +1,10 @@
+django
+djangorestframework
+shapely
+gunicorn
+psycopg2-binary
+python-dotenv
+redgreenunittest
+factory_boy
+whitenoise
+django-cors-headers 

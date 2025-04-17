@@ -6,7 +6,7 @@
     <a href="https://github.com/AntoniPokrzywa/Sociale/tree/main/docs"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="sociale.me">View Demo</a>
+    <a href="https://sociale.apokrzywa.tech/bikes/">View Demo</a>
     ·
     <a href="https://github.com/AntoniPokrzywa/Sociale/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
     ·
@@ -17,8 +17,9 @@
 <!-- GETTING STARTED -->
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
+Sociale helps you share bikes among friends with ease. It's really easy to set up and provides everything you need to manage bike rentals, including bike locations, parking areas, and rentals.
+
+You can define who is allowed to rent bikes, specify safe spots for locking them, and save extra money by avoiding costly commercial bike or electric scooter rentals
 
 ### Prerequisites
 
@@ -36,15 +37,37 @@ docker --version
    cd https://github.com/antonipokrzywa/sociale
 
 2. **Set up environment variables**  
-   Ensure the `.env` file is present and properly configured with the correct database credentials, if you are planning to add password reset functionality make sure to include it too
+   Ensure the `.env` file is present and properly configured with as follows:
+    ```python
+    POSTGRES_DB=<your_database_name>
+    POSTGRES_USER=<your_database_user>
+    POSTGRES_PASSWORD=<your_database_password>
+    POSTGRES_HOST=<your_database_host>         
+    POSTGRES_PORT=5432
+    DB_IGNORE_SSL=<true|false>
+    ```
+    If you are planning to use email verification and password reset make sure to add these variables too:
+    ```python
+    EMAIL_HOST=<your_smtp_host>                
+    EMAIL_PORT=<your_email_port>
+    EMAIL_HOST_USER=<your_email_address>
+    EMAIL_HOST_PASSWORD=<your_email_password>
+    EMAIL_USE_TLS=<true|false> 
+    ```
+   You can also add `DJANGO_SUPERUSER_EMAIL` and `DJANGO_SUPERUSER_PASSWORD` for automatic superuser creation
 
-3. **Set up the Docker container**  
+   > [!IMPORTANT]  
+   > Don't forget about creating a secret key and setting the `DJANGO_SECRET_KEY` in your environment variables.  Ensure that it is kept secure and never shared publicly.
+
+
+
+1. **Set up the Docker container**  
    Build and start the Docker containers:
    ```bash
    docker compose up --build
    ```
 
-4. **Access the app**  
+2. **Access the app**  
    Once the containers are up, the app will be available at:
    ```bash
    http://localhost:8000
@@ -52,10 +75,32 @@ docker --version
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-## Further steps
+## Overview
 
-TODO add some cool webap photos and provice link
+If you are only here  for api docs click <a href="./docs/api_reference.md"> here </a>
 
+This project is composed of four main applications: Users, Bikes, Parkings, and Rentals. Below is a brief description of what each app does:
+
+
+- **Users**
+  - Allows users to create an account, log in, verify their email, and reset passwords securely.
+  - Admins can manage all user accounts in the system.
+  - Includes status control (active/verified/staff).
+
+- **Bikes**
+  - Returns available bikes on  for users that are verified and active
+  - Admins can list, add, update, and remove bikes
+  - Each bike has location, availability, and QR code data
+
+- **Parkings**
+  - Returns parking zones for displaying them on the map.
+  - Admins can perform CRUD operations on them
+
+- **Rentals**
+  - Users can start and finish a bike rental (must be verified + activated).
+  - Admins can monitor all rentals, filter by status/user and update them if neccessary
+
+Additionally, any unauthorized access attempts are logged and can be reviewed by admins
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

@@ -250,7 +250,6 @@ Retrieve a list of all users.
       "is_active": true,
       "is_staff": false
     },
-    ...
   ]
   ```
 ---
@@ -560,15 +559,15 @@ Retrieve a list of all parkings.
   [
     {
       "name": "Central Parking",
-      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ "..." ] ] ] },
       "capacity": 150
     },
     {
       "name": "Bronx Parking",
-      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.946589, 50.051214 ], [ ... ] ] ] },
+      "coords": { "type": "Polygon", "coordinates": [ [ [ 19.946589, 50.051214 ], [ "..." ] ] ] },
       "capacity": 100
     },
-    ...
+    "..."
   ]
 ```
 
@@ -586,7 +585,7 @@ Retrieve detailed information for a specific parking by its ID.  *(Admin only)*
   ```json
   {
     "name": "Central Parking",
-    "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+    "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], ["..." ] ] ] },
     "capacity": 150
   }
   ```
@@ -604,7 +603,7 @@ Create a new parking with provided details. *(Admin only)*
 ```json
 {
   "name": "New Parking Lot",
-  "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ ... ] ] ] },
+  "coords": { "type": "Polygon", "coordinates": [ [ [ 19.941945, 50.060453 ], [ "..." ] ] ] },
   "capacity": 200
 }
 ```
