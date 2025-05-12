@@ -49,6 +49,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
+          
       - name: Install Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -64,12 +65,8 @@ jobs:
       - name: Migrate Things
         run: | 
           python manage.py migrate
+
       - name: Run tests with coverage
         run: |
           coverage run manage.py test
           coverage report
-          coverage xml
-      - name: Comment test coverage
-        uses: py-cov/python-coverage-comment-action@v1
-        with:
-          coverage-file: coverage.xml
