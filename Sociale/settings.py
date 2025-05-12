@@ -33,6 +33,8 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', '1').lower() in ('true', '1', 'yes')
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
+FRONTEND_URL = os.environ.get("FRONTEND_URL", 'http://localhost:3000')
+
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(',')
 AUTH_USER_MODEL = 'users.User'
 
@@ -66,11 +68,9 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-INSTALLED_APPS = [
-    'corsheaders'
-]
+
 CORS_ORIGIN_WHITELIST = [
-     os.environ.get("FRONTEND_URL", 'http://localhost:3000')
+    FRONTEND_URL
 ]
 ROOT_URLCONF = 'Sociale.urls'
 
@@ -177,8 +177,11 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+if True:
+    LOGLEVEL = 'CRITICAL'
+else:
+    LOGLEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
 
-LOGLEVEL = os.environ.get('DJANGO_LOG_LEVEL', 'INFO').upper()
 LOG_DIR = os.path.join(BASE_DIR, 'logs')
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
@@ -225,12 +228,12 @@ LOGGING = {
         },
         'django.request': {
             'handlers': ['console', 'file'],
-            'level': 'ERROR',
+            'level': LOGLEVEL,
             'propagate': False,
         },
         'users': {
             'handlers': ['console', 'file_users'],
-            'level': 'INFO',
+            'level': LOGLEVEL,
             'propagate': False,
         },
     },

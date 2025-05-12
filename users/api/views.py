@@ -205,6 +205,8 @@ class ResetPasswordRequestApi(APIView):
         logger.info(
             "PASSWORD RESET REQUEST: %s", user.email, extra={"request": request}
         )
+        import os
+
         return Response(
             {"detail": "Your password reset link has been sent"},
             status=status.HTTP_200_OK,
@@ -219,6 +221,7 @@ class ResetPasswordCheckApi(APIView):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+
 
         try:
             user_id = int(force_str(urlsafe_base64_decode(data["uid"])))
