@@ -70,6 +70,6 @@ jobs:
           coverage report
           coverage xml
       - name: Comment test coverage
-        uses: py-cov-action/python-coverage-comment-action@v1
+        uses: py-cov/python-coverage-comment-action@v1
         with:
           coverage-file: coverage.xml
