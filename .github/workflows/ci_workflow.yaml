@@ -64,7 +64,12 @@ jobs:
       - name: Migrate Things
         run: | 
           python manage.py migrate
-      - name: Run Tests
+      - name: Run tests with coverage
         run: |
           coverage run manage.py test
           coverage report
+          coverage xml
+      - name: Comment test coverage
+        uses: py-cov-action/python-coverage-comment-action@v1
+        with:
+          coverage-file: coverage.xml
